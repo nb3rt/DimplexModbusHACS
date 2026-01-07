@@ -156,6 +156,36 @@ FAULT_MAP: Final = {
     31: "Flow fault",
 }
 
+SENSOR_ERROR_MAP: Final = {
+    1: "External sensor (R1)",
+    2: "Return flow sensor (R2)",
+    3: "Hot water sensor (R3)",
+    4: "Coding (R7)",
+    5: "Flow sensor (R9)",
+    6: "2nd heating circuit sensor (R5)",
+    7: "3rd heating circuit sensor (R13)",
+    8: "Regenerative sensor (R13)",
+    9: "Room sensor 1",
+    10: "Room sensor 2",
+    11: "Sensor Heat Source Outlet (R6)",
+    12: "Heat source inlet sensor (R24)",
+    14: "Collector sensor (R23)",
+    15: "Low pressure sensor (R25)",
+    16: "High pressure sensor (R26)",
+    17: "Room humidity 1",
+    18: "Room humidity 2",
+    19: "Frost protection sensor",
+    20: "Heißgas",
+    21: "Return flow sensor (R2.1)",
+    22: "Swimming pool sensor (R20)",
+    23: "Flow temperature sensor for passive cooling (R11)",
+    24: "Return flow sensor for passive cooling (R4)",
+    26: "Sensor for solar storage tank (R22)",
+    28: "Heating demand sensor (R2.2)",
+    29: "RTM Econ",
+    30: "Cooling demand sensor (R39)",
+}
+
 SG_READY_MAP: Final = {
     0: "Hardware",
     10: "Yellow",
