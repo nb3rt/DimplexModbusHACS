@@ -27,7 +27,7 @@
       "init": {
         "data": {
           "scan_interval": "Scan interval (seconds)",
-          "enable_write_entities": "Enable write entities",
+          "enable_write_entities": "Enable write entities (creates SG Ready mode entity)",
           "enable_ems_entities": "Enable EMS entities",
           "enable_bms_temp": "Enable BMS outdoor temperature entity",
           "enable_external_lock": "Enable external lock entity"

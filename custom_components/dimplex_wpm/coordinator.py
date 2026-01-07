@@ -25,6 +25,7 @@ from .const import (
     REG_SG_READY_MODE,
     REG_SENSOR_ERROR_CODE,
     REG_STATUS_CODE,
+    SENSOR_ERROR_MAP,
     SG_READY_MAP,
     STATUS_MAP,
 )
@@ -108,7 +109,7 @@ class DimplexDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         if REG_SENSOR_ERROR_CODE in raw:
             derived["sensor_error_text"] = _map_code(
                 raw[REG_SENSOR_ERROR_CODE],
-                {},
+                SENSOR_ERROR_MAP,
             )
         if REG_SG_READY_MODE in raw:
             derived["sg_ready_text"] = _map_code(raw[REG_SG_READY_MODE], SG_READY_MAP)

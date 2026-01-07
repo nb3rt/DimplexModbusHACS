@@ -8,6 +8,7 @@ from homeassistant import config_entries
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import callback
 
+from .modbus_client import DimplexModbusClient
 from .const import (
     CONF_ENABLE_BMS_TEMP,
     CONF_ENABLE_EMS,
@@ -33,14 +34,36 @@ class DimplexConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
+    async def _async_validate_input(self, user_input: dict) -> None:
+        client = DimplexModbusClient(
+            user_input[CONF_HOST],
+            user_input[CONF_PORT],
+            user_input[CONF_UNIT_ID],
+            user_input[CONF_TIMEOUT],
+        )
+        try:
+            await client.connect()
+            registers = await client.read_input_registers(0, 1)
+            if registers is None:
+                raise ConnectionError("Unable to read from Modbus device")
+        finally:
+            await client.close()
+
     async def async_step_user(self, user_input=None):
         """Handle the initial step."""
         errors = {}
 
         if user_input is not None:
-            await self.async_set_unique_id(f"{user_input[CONF_HOST]}_{user_input[CONF_UNIT_ID]}")
-            self._abort_if_unique_id_configured()
-            return self.async_create_entry(title="Dimplex WPM", data=user_input)
+            try:
+                await self._async_validate_input(user_input)
+            except Exception:
+                errors["base"] = "cannot_connect"
+            else:
+                await self.async_set_unique_id(
+                    f"{user_input[CONF_HOST]}_{user_input[CONF_UNIT_ID]}"
+                )
+                self._abort_if_unique_id_configured()
+                return self.async_create_entry(title="Dimplex WPM", data=user_input)
 
         data_schema = vol.Schema(
             {

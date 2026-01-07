@@ -2,6 +2,10 @@
 
 Custom HACS integration for connecting Dimplex WPM / NWPM heat pump controllers over Modbus TCP. The integration batches Modbus reads through a dedicated async pymodbus client, exposes sensors and binary sensors via a `DataUpdateCoordinator`, builds a device tree (Controller → HC1 → DHW → Smart Grid), and allows writing SG Ready mode as a select entity.
 
+## Dimplex Modbus TCP documentation
+
+Reference specification for Dimplex heat pumps: https://dimplex.atlassian.net/wiki/spaces/DW/pages/3303571457/Modbus+TCP+Anbindung
+
 ## Features (v0.1.0)
 
 - Config Flow and Options Flow (UI-first, stored in Config Entries).
@@ -61,6 +65,7 @@ Options Flow:
 - `DataUpdateCoordinator` batches reads into contiguous ranges for efficiency.
 - Entities are thin wrappers reading from `coordinator.data` (`raw` and `derived` dicts).
 - SG Ready writes call `write_register` on register `5167`, mapping friendly strings to numeric codes.
+- Register addresses match the Dimplex documentation (1-based); the integration applies the Modbus client offset automatically.
 
 ## Development roadmap
 
