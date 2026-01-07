@@ -9,6 +9,8 @@ from typing import Iterable, Optional
 from pymodbus.client import AsyncModbusTcpClient
 from pymodbus.exceptions import ModbusException
 
+from .const import REGISTER_OFFSET
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -69,6 +71,7 @@ class DimplexModbusClient:
 
     async def write_register(self, address: int, value: int) -> None:
         """Write a single holding register."""
+        address += REGISTER_OFFSET
         async with self._lock:
             await self._ensure_connected()
             try:
