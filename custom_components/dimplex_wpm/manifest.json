@@ -3,7 +3,7 @@
   "name": "Dimplex WPM",
   "version": "0.1.0",
   "config_flow": true,
-  "documentation": "https://github.com/",
+  "documentation": "https://dimplex.atlassian.net/wiki/spaces/DW/pages/3303571457/Modbus+TCP+Anbindung",
   "requirements": [
     "pymodbus==3.6.8"
   ],
