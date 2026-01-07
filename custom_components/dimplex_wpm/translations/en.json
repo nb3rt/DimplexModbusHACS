@@ -1,0 +1,103 @@
+{
+  "title": "Dimplex WPM",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Dimplex WPM",
+        "description": "Connect to your Dimplex WPM/NWPM controller.",
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "unit_id": "Unit ID",
+          "scan_interval": "Scan interval (seconds)",
+          "timeout": "Timeout (seconds)",
+          "register_strategy": "Register bank strategy"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Unable to connect to device"
+    },
+    "abort": {
+      "already_configured": "Device is already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Scan interval (seconds)",
+          "enable_write_entities": "Enable write entities",
+          "enable_ems_entities": "Enable EMS entities",
+          "enable_bms_temp": "Enable BMS outdoor temperature entity",
+          "enable_external_lock": "Enable external lock entity"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "controller_info": {
+        "name": "Controller info"
+      },
+      "outdoor_temperature": {
+        "name": "Outdoor temperature"
+      },
+      "return_temperature": {
+        "name": "Return temperature"
+      },
+      "return_setpoint_temperature": {
+        "name": "Return setpoint temperature"
+      },
+      "flow_temperature": {
+        "name": "Flow temperature"
+      },
+      "dhw_temperature": {
+        "name": "DHW temperature"
+      },
+      "status_code": {
+        "name": "Status code"
+      },
+      "status_text": {
+        "name": "Status"
+      },
+      "lock_code": {
+        "name": "Lock code"
+      },
+      "lock_text": {
+        "name": "Lock"
+      },
+      "fault_code": {
+        "name": "Fault code"
+      },
+      "fault_text": {
+        "name": "Fault"
+      },
+      "sensor_error_code": {
+        "name": "Sensor error code"
+      },
+      "sensor_error_text": {
+        "name": "Sensor error"
+      },
+      "sg_ready_code": {
+        "name": "SG Ready code"
+      },
+      "sg_ready_text": {
+        "name": "SG Ready state"
+      }
+    },
+    "binary_sensor": {
+      "fault_active": {
+        "name": "Fault active"
+      },
+      "lock_active": {
+        "name": "Lock active"
+      }
+    },
+    "select": {
+      "sg_ready_mode": {
+        "name": "SG Ready mode"
+      }
+    }
+  }
+}
