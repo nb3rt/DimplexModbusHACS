@@ -33,9 +33,10 @@ async def async_setup_entry(
     coordinator = data["coordinator"]
     allow_write = data.get(CONF_ENABLE_WRITE_ENTITIES, DEFAULT_ENABLE_WRITE)
 
-    async_add_entities(
-        [DimplexSGReadySelect(coordinator, entry, allow_write)],
-    )
+    if allow_write:
+        async_add_entities(
+            [DimplexSGReadySelect(coordinator, entry, allow_write)],
+        )
 
 
 class DimplexSGReadySelect(CoordinatorEntity, SelectEntity):

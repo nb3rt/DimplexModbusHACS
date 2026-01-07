@@ -9,6 +9,8 @@ from typing import Iterable, Optional
 from pymodbus.client import AsyncModbusTcpClient
 from pymodbus.exceptions import ModbusException
 
+from .const import REGISTER_OFFSET
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -69,6 +71,7 @@ class DimplexModbusClient:
 
     async def write_register(self, address: int, value: int) -> None:
         """Write a single holding register."""
+        address += REGISTER_OFFSET
         async with self._lock:
             await self._ensure_connected()
             try:
@@ -116,10 +119,11 @@ class DimplexModbusClient:
         """Batch read multiple ranges and return register/value mapping."""
         values: dict[int, int] = {}
         for start, count in ranges:
+            modbus_start = start + REGISTER_OFFSET
             if register_type == "holding":
-                data = await self.read_holding_registers(start, count)
+                data = await self.read_holding_registers(modbus_start, count)
             else:
-                data = await self.read_input_registers(start, count)
+                data = await self.read_input_registers(modbus_start, count)
             if data is None:
                 continue
             for offset, value in enumerate(data):

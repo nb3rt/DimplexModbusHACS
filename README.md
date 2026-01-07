@@ -66,6 +66,7 @@ Options Flow:
 - `DataUpdateCoordinator` batches reads into contiguous ranges for efficiency.
 - Entities are thin wrappers reading from `coordinator.data` (`raw` and `derived` dicts).
 - SG Ready writes call `write_register` on register `5167`, mapping friendly strings to numeric codes.
+- Register addresses match the Dimplex documentation (1-based); the integration applies the Modbus client offset automatically.
 
 ## Development roadmap
 
