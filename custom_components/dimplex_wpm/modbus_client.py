@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
 import logging
-from typing import Iterable, Optional
+from typing import Any, Callable, Iterable, Optional
 
 from pymodbus.client import AsyncModbusTcpClient
 from pymodbus.exceptions import ModbusException
@@ -77,7 +78,7 @@ class DimplexModbusClient:
             try:
                 assert self._client is not None
                 result = await self._client.write_register(
-                    address, value, unit=self._unit_id
+                    address, value, **self._unit_kwargs(self._client.write_register)
                 )
             except ModbusException as err:
                 LOGGER.error("Modbus write failed: %s", err)
@@ -95,7 +96,11 @@ class DimplexModbusClient:
             try:
                 assert self._client is not None
                 func = getattr(self._client, method)
-                result = await func(address=address, count=count, unit=self._unit_id)
+                result = await func(
+                    address=address,
+                    count=count,
+                    **self._unit_kwargs(func),
+                )
             except ModbusException as err:
                 LOGGER.error("Modbus read failed: %s", err)
                 raise
@@ -110,6 +115,15 @@ class DimplexModbusClient:
                 result.registers,
             )
             return result.registers
+
+    def _unit_kwargs(self, func: Callable[..., Any]) -> dict[str, int]:
+        """Return the correct unit/slave argument for the pymodbus call."""
+        params = inspect.signature(func).parameters
+        if "unit" in params:
+            return {"unit": self._unit_id}
+        if "slave" in params:
+            return {"slave": self._unit_id}
+        return {}
 
     async def read_ranges(
         self,
