@@ -8,6 +8,7 @@ from homeassistant import config_entries
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import callback
 
+from .modbus_client import DimplexModbusClient
 from .const import (
     CONF_ENABLE_BMS_TEMP,
     CONF_ENABLE_EMS,
@@ -32,6 +33,21 @@ class DimplexConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Dimplex WPM."""
 
     VERSION = 1
+
+    async def _async_validate_input(self, user_input: dict) -> None:
+        client = DimplexModbusClient(
+            user_input[CONF_HOST],
+            user_input[CONF_PORT],
+            user_input[CONF_UNIT_ID],
+            user_input[CONF_TIMEOUT],
+        )
+        try:
+            await client.connect()
+            registers = await client.read_input_registers(0, 1)
+            if registers is None:
+                raise ConnectionError("Unable to read from Modbus device")
+        finally:
+            await client.close()
 
     async def async_step_user(self, user_input=None):
         """Handle the initial step."""
