@@ -25,7 +25,6 @@ from .const import (
     REG_SG_READY_MODE,
     REG_SENSOR_ERROR_CODE,
     REG_STATUS_CODE,
-    REGISTER_OFFSET,
     SG_READY_MAP,
     STATUS_MAP,
 )
@@ -133,10 +132,10 @@ class DimplexDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         """Read registers according to configured strategy."""
         # Minimal set of contiguous ranges to reduce calls.
         ranges = [
-            (REG_OUTDOOR_TEMPERATURE + REGISTER_OFFSET, 6),  # 1-6 includes temperatures
-            (REG_RETURN_SETPOINT_TEMPERATURE + REGISTER_OFFSET, 1),
-            (REG_STATUS_CODE + REGISTER_OFFSET, 4),  # 103-106 codes
-            (REG_SG_READY_MODE + REGISTER_OFFSET, 1),
+            (REG_OUTDOOR_TEMPERATURE, 6),  # 1-6 includes temperatures
+            (REG_RETURN_SETPOINT_TEMPERATURE, 1),
+            (REG_STATUS_CODE, 4),  # 103-106 codes
+            (REG_SG_READY_MODE, 1),
         ]
 
         strategy = "holding" if self._register_strategy == "holding" else "input"
@@ -146,23 +145,14 @@ class DimplexDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             try:
                 raw = await self._client.read_ranges(ranges, "input")
                 if raw:
-                    return _apply_register_offset(raw)
+                    return raw
             except Exception as err:
                 LOGGER.debug("Input register read failed (%s), retrying as holding", err)
-            raw = await self._client.read_ranges(ranges, "holding")
-            return _apply_register_offset(raw)
+            return await self._client.read_ranges(ranges, "holding")
 
-        raw = await self._client.read_ranges(ranges, strategy)
-        return _apply_register_offset(raw)
+        return await self._client.read_ranges(ranges, strategy)
 
     @property
     def write_sg_ready(self) -> Callable[[int, int], Any]:
         """Return helper for writing SG Ready values."""
         return self._client.write_register
-
-
-def _apply_register_offset(raw: dict[int, int]) -> dict[int, int]:
-    """Convert Modbus client addresses back to Dimplex documentation addresses."""
-    if REGISTER_OFFSET == 0:
-        return raw
-    return {address - REGISTER_OFFSET: value for address, value in raw.items()}
