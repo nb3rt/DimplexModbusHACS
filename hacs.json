@@ -1,0 +1,10 @@
+{
+  "name": "Dimplex WPM",
+  "domains": ["dimplex_wpm"],
+  "country": "PL",
+  "render_readme": true,
+  "homeassistant": "2024.2.0",
+  "zip_release": false,
+  "filename": "dimplex_wpm.zip",
+  "integration_type": "integration"
+}
