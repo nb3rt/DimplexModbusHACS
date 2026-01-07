@@ -54,16 +54,11 @@ class DimplexConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
 
         if user_input is not None:
-            try:
-                await self._async_validate_input(user_input)
-            except Exception:
-                errors["base"] = "cannot_connect"
-            else:
-                await self.async_set_unique_id(
-                    f"{user_input[CONF_HOST]}_{user_input[CONF_UNIT_ID]}"
-                )
-                self._abort_if_unique_id_configured()
-                return self.async_create_entry(title="Dimplex WPM", data=user_input)
+            await self.async_set_unique_id(
+                f"{user_input[CONF_HOST]}:{user_input[CONF_PORT]}_{user_input[CONF_UNIT_ID]}"
+            )
+            self._abort_if_unique_id_configured()
+            return self.async_create_entry(title="Dimplex WPM", data=user_input)
 
         data_schema = vol.Schema(
             {
