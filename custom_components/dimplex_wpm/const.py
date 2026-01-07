@@ -53,19 +53,53 @@ REG_SENSOR_ERROR_CODE: Final = 106
 
 REG_SG_READY_MODE: Final = 5167
 
-STATUS_MAP: Final = {
+STATUS_MAP_LM: Final = {
+    0: "Off",
+    1: "Off",
+    2: "Heating",
+    3: "Swimming pool",
+    4: "Domestic hot water",
+    5: "Cooling",
+    6: "Reserved",
+    7: "Reserved",
+    8: "Reserved",
+    9: "Reserved",
+    10: "Defrost",
+    11: "Flow monitoring",
+    12: "Reserved",
+    13: "Reserved",
+    14: "Reserved",
+    15: "Reserved",
+    16: "Reserved",
+    17: "Reserved",
+    18: "Reserved",
+    19: "Reserved",
+    20: "Reserved",
+    21: "Reserved",
+    22: "Reserved",
+    23: "Reserved",
+    24: "Operating mode switch delay",
+    25: "Reserved",
+    26: "Reserved",
+    27: "Reserved",
+    28: "Reserved",
+    29: "Passive cooling",
+    30: "Lock (see lock register)",
+}
+
+STATUS_MAP_HJ: Final = {
     0: "Off",
     1: "Heat pump on – heating",
-    2: "Heating",
+    2: "Heat pump on – heating",
     3: "Heat pump on – swimming pool",
-    4: "Domestic hot water",
-    5: "Cooling (heat pump + 2nd heat generator)",
-    6: "Swimming pool + 2nd heat generator",
-    7: "Domestic hot water + 2nd heat generator",
+    4: "Heat pump on – domestic hot water",
+    5: "Heat pump on – heating + 2nd heat generator",
+    6: "Heat pump on – swimming pool + 2nd heat generator",
+    7: "Heat pump on – domestic hot water + 2nd heat generator",
     8: "Primary pump pre-run",
     9: "Heating purge",
-    10: "Defrost (locked – see locks)",
-    11: "Flow monitoring / lower operating limit",
+    10: "Lock (see lock register for J software)",
+    11: "Lower operating limit",
     12: "Low-pressure limit",
     13: "Low-pressure shutdown",
     14: "High-pressure safety",
@@ -78,13 +112,13 @@ STATUS_MAP: Final = {
     21: "Heat pump on – defrost",
     22: "Upper operating limit",
     23: "External lock",
-    24: "Cooling mode switch delay / cooling operating mode",
+    24: "Cooling operating mode",
     25: "Frost protection (cooling)",
     26: "Flow temperature limit",
     27: "Dew point monitor",
     28: "Dew point",
-    29: "Passive cooling",
-    30: "Lock (see lock register)",
+    29: "Reserved",
+    30: "Reserved",
 }
 
 LOCK_MAP: Final = {
@@ -172,7 +206,12 @@ SG_READY_MAP: Final = {
 
 SG_READY_REVERSE: Final = {value: key for key, value in SG_READY_MAP.items()}
 
-STATUS_MAP_BY_VERSION: Final = {version: STATUS_MAP for version in SOFTWARE_VERSIONS}
+STATUS_MAP_BY_VERSION: Final = {
+    "H": STATUS_MAP_HJ,
+    "J": STATUS_MAP_HJ,
+    "L": STATUS_MAP_LM,
+    "M": STATUS_MAP_LM,
+}
 LOCK_MAP_BY_VERSION: Final = {version: LOCK_MAP for version in SOFTWARE_VERSIONS}
 FAULT_MAP_BY_VERSION: Final = {version: FAULT_MAP for version in SOFTWARE_VERSIONS}
 SENSOR_ERROR_MAP_BY_VERSION: Final = {
