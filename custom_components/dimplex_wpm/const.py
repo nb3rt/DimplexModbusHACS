@@ -12,6 +12,9 @@ DEFAULT_SCAN_INTERVAL: Final = 30
 DEFAULT_TIMEOUT: Final = 5
 DEFAULT_ENABLE_WRITE: Final = False
 
+# Dimplex documentation uses 1-based register numbers, while pymodbus expects 0-based.
+REGISTER_OFFSET: Final = -1
+
 CONF_HOST: Final = "host"
 CONF_PORT: Final = "port"
 CONF_UNIT_ID: Final = "unit_id"
