@@ -313,6 +313,7 @@ FAULT_MAP_HJ: Final = {
 }
 
 SENSOR_ERROR_MAP_LM: Final = {
+    0: "All sensors OK",
     1: "Outdoor sensor (R1)",
     2: "Return sensor (R2)",
     3: "Domestic hot water sensor (R3)",
@@ -341,7 +342,9 @@ SENSOR_ERROR_MAP_LM: Final = {
     29: "RTM Econ",
     30: "Cooling demand sensor (R39)",
 }
-SENSOR_ERROR_MAP_EMPTY: Final = {}
+SENSOR_ERROR_MAP_EMPTY: Final = {
+    0: "All sensors OK",
+}
 SENSOR_ERROR_MAP: Final = SENSOR_ERROR_MAP_LM
 
 SG_READY_MAP: Final = {
