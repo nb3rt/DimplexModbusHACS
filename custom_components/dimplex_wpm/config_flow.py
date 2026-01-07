@@ -15,16 +15,19 @@ from .const import (
     CONF_ENABLE_WRITE_ENTITIES,
     CONF_REGISTER_STRATEGY,
     CONF_SCAN_INTERVAL,
+    CONF_SOFTWARE_VERSION,
     CONF_TIMEOUT,
     CONF_UNIT_ID,
     DEFAULT_ENABLE_WRITE,
     DEFAULT_PORT,
     DEFAULT_SCAN_INTERVAL,
+    DEFAULT_SOFTWARE_VERSION,
     DEFAULT_TIMEOUT,
     DEFAULT_UNIT_ID,
     DOMAIN,
     REGISTER_STRATEGY_MAP,
     REGISTER_STRATEGY_AUTO,
+    SOFTWARE_VERSIONS,
 )
 
 
@@ -53,6 +56,10 @@ class DimplexConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Optional(CONF_TIMEOUT, default=DEFAULT_TIMEOUT): vol.All(
                     int, vol.Range(min=1, max=30)
                 ),
+                vol.Optional(
+                    CONF_SOFTWARE_VERSION,
+                    default=DEFAULT_SOFTWARE_VERSION,
+                ): vol.In(SOFTWARE_VERSIONS),
                 vol.Optional(CONF_REGISTER_STRATEGY, default=REGISTER_STRATEGY_AUTO): vol.In(
                     REGISTER_STRATEGY_MAP
                 ),

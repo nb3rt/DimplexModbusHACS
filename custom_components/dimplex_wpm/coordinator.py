@@ -13,9 +13,9 @@ from homeassistant.util import dt as dt_util
 
 from .const import (
     DEFAULT_SCAN_INTERVAL,
-    FAULT_MAP,
+    FAULT_MAP_BY_VERSION,
     REG_FAULT_CODE,
-    LOCK_MAP,
+    LOCK_MAP_BY_VERSION,
     REG_LOCK_CODE,
     REG_DHW_TEMPERATURE,
     REG_FLOW_TEMPERATURE,
@@ -23,10 +23,11 @@ from .const import (
     REG_RETURN_SETPOINT_TEMPERATURE,
     REG_RETURN_TEMPERATURE,
     REG_SG_READY_MODE,
+    SENSOR_ERROR_MAP_BY_VERSION,
     REG_SENSOR_ERROR_CODE,
     REG_STATUS_CODE,
     SG_READY_MAP,
-    STATUS_MAP,
+    STATUS_MAP_BY_VERSION,
 )
 from .modbus_client import DimplexModbusClient
 
@@ -61,6 +62,7 @@ class DimplexDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         host: str | None = None,
         port: int | None = None,
         unit_id: int | None = None,
+        software_version: str | None = None,
     ) -> None:
         super().__init__(
             hass,
@@ -75,7 +77,9 @@ class DimplexDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             "port": port,
             "unit_id": unit_id,
             "register_strategy": register_strategy,
+            "software_version": software_version,
         }
+        self._software_version = software_version
         self._consecutive_failures = 0
 
     async def _async_update_data(self) -> dict[str, Any]:
@@ -103,20 +107,33 @@ class DimplexDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         if REG_DHW_TEMPERATURE in raw:
             derived["dhw_temperature"] = _decode_temperature(raw[REG_DHW_TEMPERATURE])
 
+        status_map = STATUS_MAP_BY_VERSION.get(
+            self._software_version, STATUS_MAP_BY_VERSION["H"]
+        )
+        lock_map = LOCK_MAP_BY_VERSION.get(
+            self._software_version, LOCK_MAP_BY_VERSION["H"]
+        )
+        fault_map = FAULT_MAP_BY_VERSION.get(
+            self._software_version, FAULT_MAP_BY_VERSION["H"]
+        )
+        sensor_error_map = SENSOR_ERROR_MAP_BY_VERSION.get(
+            self._software_version, SENSOR_ERROR_MAP_BY_VERSION["H"]
+        )
+
         if REG_STATUS_CODE in raw:
-            derived["status_text"] = _map_code(raw[REG_STATUS_CODE], STATUS_MAP)
+            derived["status_text"] = _map_code(raw[REG_STATUS_CODE], status_map)
         if REG_SENSOR_ERROR_CODE in raw:
             derived["sensor_error_text"] = _map_code(
                 raw[REG_SENSOR_ERROR_CODE],
-                {},
+                sensor_error_map,
             )
         if REG_SG_READY_MODE in raw:
             derived["sg_ready_text"] = _map_code(raw[REG_SG_READY_MODE], SG_READY_MAP)
         if REG_LOCK_CODE in raw:
-            derived["lock_text"] = _map_code(raw[REG_LOCK_CODE], LOCK_MAP)
+            derived["lock_text"] = _map_code(raw[REG_LOCK_CODE], lock_map)
             derived["lock_active"] = raw[REG_LOCK_CODE] != 0
         if REG_FAULT_CODE in raw:
-            derived["fault_text"] = _map_code(raw[REG_FAULT_CODE], FAULT_MAP)
+            derived["fault_text"] = _map_code(raw[REG_FAULT_CODE], fault_map)
             derived["fault_active"] = raw[REG_FAULT_CODE] != 0
 
         meta = {

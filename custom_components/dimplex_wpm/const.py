@@ -11,12 +11,14 @@ DEFAULT_UNIT_ID: Final = 1
 DEFAULT_SCAN_INTERVAL: Final = 30
 DEFAULT_TIMEOUT: Final = 5
 DEFAULT_ENABLE_WRITE: Final = False
+DEFAULT_SOFTWARE_VERSION: Final = "H"
 
 CONF_HOST: Final = "host"
 CONF_PORT: Final = "port"
 CONF_UNIT_ID: Final = "unit_id"
 CONF_SCAN_INTERVAL: Final = "scan_interval"
 CONF_TIMEOUT: Final = "timeout"
+CONF_SOFTWARE_VERSION: Final = "software_version"
 CONF_REGISTER_STRATEGY: Final = "register_strategy"
 CONF_ENABLE_WRITE_ENTITIES: Final = "enable_write_entities"
 CONF_ENABLE_EMS: Final = "enable_ems_entities"
@@ -32,6 +34,8 @@ REGISTER_STRATEGY_MAP: Final = {
     REGISTER_STRATEGY_HOLDING: REGISTER_STRATEGY_HOLDING,
     REGISTER_STRATEGY_INPUT: REGISTER_STRATEGY_INPUT,
 }
+
+SOFTWARE_VERSIONS: Final = ["H", "J", "L", "M"]
 
 REG_OUTDOOR_TEMPERATURE: Final = 1
 REG_RETURN_TEMPERATURE: Final = 2
@@ -153,6 +157,8 @@ FAULT_MAP: Final = {
     31: "Flow fault",
 }
 
+SENSOR_ERROR_MAP: Final = {}
+
 SG_READY_MAP: Final = {
     0: "Hardware",
     10: "Yellow",
@@ -162,6 +168,13 @@ SG_READY_MAP: Final = {
 }
 
 SG_READY_REVERSE: Final = {value: key for key, value in SG_READY_MAP.items()}
+
+STATUS_MAP_BY_VERSION: Final = {version: STATUS_MAP for version in SOFTWARE_VERSIONS}
+LOCK_MAP_BY_VERSION: Final = {version: LOCK_MAP for version in SOFTWARE_VERSIONS}
+FAULT_MAP_BY_VERSION: Final = {version: FAULT_MAP for version in SOFTWARE_VERSIONS}
+SENSOR_ERROR_MAP_BY_VERSION: Final = {
+    version: SENSOR_ERROR_MAP for version in SOFTWARE_VERSIONS
+}
 
 DEVICE_MANUFACTURER: Final = "Dimplex"
 DEVICE_NAME: Final = "Dimplex WPM"
