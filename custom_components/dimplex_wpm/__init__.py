@@ -15,10 +15,12 @@ from .const import (
     CONF_ENABLE_WRITE_ENTITIES,
     CONF_REGISTER_STRATEGY,
     CONF_SCAN_INTERVAL,
+    CONF_SOFTWARE_VERSION,
     CONF_TIMEOUT,
     CONF_UNIT_ID,
     DEFAULT_ENABLE_WRITE,
     DEFAULT_SCAN_INTERVAL,
+    DEFAULT_SOFTWARE_VERSION,
     DEFAULT_TIMEOUT,
     DEFAULT_UNIT_ID,
     DOMAIN,
@@ -46,6 +48,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     timeout = entry.data.get(CONF_TIMEOUT, DEFAULT_TIMEOUT)
     scan_interval = entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
     register_strategy = entry.data.get(CONF_REGISTER_STRATEGY, "auto")
+    software_version = entry.data.get(CONF_SOFTWARE_VERSION, DEFAULT_SOFTWARE_VERSION)
 
     client = DimplexModbusClient(host, port, unit_id, timeout)
     coordinator = DimplexDataUpdateCoordinator(
@@ -56,6 +59,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         host=host,
         port=port,
         unit_id=unit_id,
+        software_version=software_version,
     )
 
     await coordinator.async_config_entry_first_refresh()
@@ -66,6 +70,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "host": host,
         "port": port,
         "unit_id": unit_id,
+        "software_version": software_version,
         CONF_ENABLE_WRITE_ENTITIES: entry.options.get(
             CONF_ENABLE_WRITE_ENTITIES, DEFAULT_ENABLE_WRITE
         ),

@@ -36,10 +36,11 @@ async def async_setup_entry(
     """Set up binary sensors from config entry."""
     data = hass.data[DOMAIN][entry.entry_id]
     coordinator = data["coordinator"]
+    software_version = data.get("software_version")
 
     entities: list[BinarySensorEntity] = [
-        DimplexBinarySensor(coordinator, entry, FAULT_DESCRIPTION),
-        DimplexBinarySensor(coordinator, entry, LOCK_DESCRIPTION),
+        DimplexBinarySensor(coordinator, entry, FAULT_DESCRIPTION, software_version),
+        DimplexBinarySensor(coordinator, entry, LOCK_DESCRIPTION, software_version),
     ]
     async_add_entities(entities)
 
@@ -49,13 +50,21 @@ class DimplexBinarySensor(CoordinatorEntity, BinarySensorEntity):
 
     entity_description: BinarySensorEntityDescription
 
-    def __init__(self, coordinator, entry: ConfigEntry, description) -> None:
+    def __init__(
+        self,
+        coordinator,
+        entry: ConfigEntry,
+        description,
+        software_version: str | None,
+    ) -> None:
         super().__init__(coordinator)
         self.entity_description = description
         self._attr_has_entity_name = True
         self._attr_translation_key = description.translation_key
         self._attr_unique_id = f"{entry.entry_id}_{MODULE_ROOT}_{description.key}"
-        self._attr_device_info = build_device_info(entry, MODULE_ROOT)
+        self._attr_device_info = build_device_info(
+            entry, MODULE_ROOT, software_version=software_version
+        )
 
     @property
     def is_on(self) -> bool | None:

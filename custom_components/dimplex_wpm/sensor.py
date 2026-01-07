@@ -65,6 +65,7 @@ SENSOR_DESCRIPTIONS: tuple[DimplexSensorEntityDescription, ...] = (
             "host": entry_data.get("host"),
             "port": entry_data.get("port"),
             "unit_id": entry_data.get("unit_id"),
+            "software_version": entry_data.get("software_version"),
             "register_strategy": data.get("meta", {}).get("register_strategy"),
             "last_update": data.get("meta", {}).get("last_update"),
             "update_success": data.get("meta", {}).get("update_success"),
@@ -206,6 +207,7 @@ async def async_setup_entry(
         "host": data.get("host"),
         "port": data.get("port"),
         "unit_id": data.get("unit_id"),
+        "software_version": data.get("software_version"),
         "enable_write": data.get(CONF_ENABLE_WRITE_ENTITIES, DEFAULT_ENABLE_WRITE),
         "enable_ems": data.get(CONF_ENABLE_EMS, False),
         "enable_bms_temp": data.get(CONF_ENABLE_BMS_TEMP, False),
@@ -253,6 +255,7 @@ class DimplexSensor(CoordinatorEntity, SensorEntity):
             description.module,
             host=integration_flags.get("host"),
             configuration_url=configuration_url,
+            software_version=integration_flags.get("software_version"),
         )
         self._attr_unique_id = f"{entry.entry_id}_{description.module}_{description.key}"
 

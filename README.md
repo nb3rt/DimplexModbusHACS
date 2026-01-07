@@ -51,6 +51,7 @@ Config Flow fields:
 - **Unit ID** (default `1`)
 - **Scan interval** (seconds, default `30`)
 - **Timeout** (seconds, default `5`)
+- **Software version** (`H`, `J`, `L`, `M`)
 - **Register bank strategy**: `auto` (try input then holding), `holding`, or `input`
 
 Options Flow:

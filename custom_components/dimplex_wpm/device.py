@@ -15,6 +15,7 @@ def build_device_info(
     *,
     host: str | None = None,
     configuration_url: str | None = None,
+    software_version: str | None = None,
 ) -> dict[str, Any]:
     """Return device info for the requested module."""
     base_identifier = (DOMAIN, entry.entry_id)
@@ -29,6 +30,9 @@ def build_device_info(
     }
     if configuration_url:
         device_info["configuration_url"] = configuration_url
+
+    if module == MODULE_ROOT and software_version:
+        device_info["sw_version"] = software_version
 
     if module != MODULE_ROOT:
         device_info["via_device"] = base_identifier

@@ -11,6 +11,7 @@ DEFAULT_UNIT_ID: Final = 1
 DEFAULT_SCAN_INTERVAL: Final = 30
 DEFAULT_TIMEOUT: Final = 5
 DEFAULT_ENABLE_WRITE: Final = False
+DEFAULT_SOFTWARE_VERSION: Final = "H"
 
 # Dimplex documentation uses 1-based register numbers, while pymodbus expects 0-based.
 REGISTER_OFFSET: Final = -1
@@ -20,6 +21,7 @@ CONF_PORT: Final = "port"
 CONF_UNIT_ID: Final = "unit_id"
 CONF_SCAN_INTERVAL: Final = "scan_interval"
 CONF_TIMEOUT: Final = "timeout"
+CONF_SOFTWARE_VERSION: Final = "software_version"
 CONF_REGISTER_STRATEGY: Final = "register_strategy"
 CONF_ENABLE_WRITE_ENTITIES: Final = "enable_write_entities"
 CONF_ENABLE_EMS: Final = "enable_ems_entities"
@@ -35,6 +37,8 @@ REGISTER_STRATEGY_MAP: Final = {
     REGISTER_STRATEGY_HOLDING: REGISTER_STRATEGY_HOLDING,
     REGISTER_STRATEGY_INPUT: REGISTER_STRATEGY_INPUT,
 }
+
+SOFTWARE_VERSIONS: Final = ["H", "J", "L", "M"]
 
 REG_OUTDOOR_TEMPERATURE: Final = 1
 REG_RETURN_TEMPERATURE: Final = 2
@@ -156,35 +160,7 @@ FAULT_MAP: Final = {
     31: "Flow fault",
 }
 
-SENSOR_ERROR_MAP: Final = {
-    1: "External sensor (R1)",
-    2: "Return flow sensor (R2)",
-    3: "Hot water sensor (R3)",
-    4: "Coding (R7)",
-    5: "Flow sensor (R9)",
-    6: "2nd heating circuit sensor (R5)",
-    7: "3rd heating circuit sensor (R13)",
-    8: "Regenerative sensor (R13)",
-    9: "Room sensor 1",
-    10: "Room sensor 2",
-    11: "Sensor Heat Source Outlet (R6)",
-    12: "Heat source inlet sensor (R24)",
-    14: "Collector sensor (R23)",
-    15: "Low pressure sensor (R25)",
-    16: "High pressure sensor (R26)",
-    17: "Room humidity 1",
-    18: "Room humidity 2",
-    19: "Frost protection sensor",
-    20: "Heißgas",
-    21: "Return flow sensor (R2.1)",
-    22: "Swimming pool sensor (R20)",
-    23: "Flow temperature sensor for passive cooling (R11)",
-    24: "Return flow sensor for passive cooling (R4)",
-    26: "Sensor for solar storage tank (R22)",
-    28: "Heating demand sensor (R2.2)",
-    29: "RTM Econ",
-    30: "Cooling demand sensor (R39)",
-}
+SENSOR_ERROR_MAP: Final = {}
 
 SG_READY_MAP: Final = {
     0: "Hardware",
@@ -195,6 +171,13 @@ SG_READY_MAP: Final = {
 }
 
 SG_READY_REVERSE: Final = {value: key for key, value in SG_READY_MAP.items()}
+
+STATUS_MAP_BY_VERSION: Final = {version: STATUS_MAP for version in SOFTWARE_VERSIONS}
+LOCK_MAP_BY_VERSION: Final = {version: LOCK_MAP for version in SOFTWARE_VERSIONS}
+FAULT_MAP_BY_VERSION: Final = {version: FAULT_MAP for version in SOFTWARE_VERSIONS}
+SENSOR_ERROR_MAP_BY_VERSION: Final = {
+    version: SENSOR_ERROR_MAP for version in SOFTWARE_VERSIONS
+}
 
 DEVICE_MANUFACTURER: Final = "Dimplex"
 DEVICE_NAME: Final = "Dimplex WPM"

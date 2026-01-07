@@ -11,6 +11,7 @@
           "unit_id": "Unit ID",
           "scan_interval": "Scan interval (seconds)",
           "timeout": "Timeout (seconds)",
+          "software_version": "Software version (H/J/L/M)",
           "register_strategy": "Register bank strategy"
         }
       }
