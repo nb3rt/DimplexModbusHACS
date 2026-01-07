@@ -342,6 +342,7 @@ SENSOR_ERROR_MAP_LM: Final = {
     30: "Cooling demand sensor (R39)",
 }
 SENSOR_ERROR_MAP_EMPTY: Final = {}
+SENSOR_ERROR_MAP: Final = SENSOR_ERROR_MAP_LM
 
 SG_READY_MAP: Final = {
     0: "Hardware",
