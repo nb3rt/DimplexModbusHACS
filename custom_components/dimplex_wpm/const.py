@@ -13,8 +13,8 @@ DEFAULT_TIMEOUT: Final = 5
 DEFAULT_ENABLE_WRITE: Final = False
 DEFAULT_SOFTWARE_VERSION: Final = "H"
 
-# Dimplex documentation uses 1-based register numbers, while pymodbus expects 0-based.
-REGISTER_OFFSET: Final = -1
+# Dimplex documentation uses 1-based register numbers and the device expects 1-based addresses.
+REGISTER_OFFSET: Final = 0
 
 CONF_HOST: Final = "host"
 CONF_PORT: Final = "port"

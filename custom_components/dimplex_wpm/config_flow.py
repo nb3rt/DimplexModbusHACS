@@ -46,7 +46,7 @@ class DimplexConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
         try:
             await client.connect()
-            registers = await client.read_input_registers(0, 1)
+            registers = await client.read_input_registers(1, 1)
             if registers is None:
                 raise ConnectionError("Unable to read from Modbus device")
         finally:
