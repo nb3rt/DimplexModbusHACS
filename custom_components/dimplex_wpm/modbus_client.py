@@ -70,6 +70,25 @@ class DimplexModbusClient:
         """Read input registers."""
         return await self._read("read_input_registers", address, count)
 
+    async def read_coils(self, address: int, count: int) -> list[bool] | None:
+        """Read coils (digital outputs/inputs)."""
+        async with self._lock:
+            await self._ensure_connected()
+            try:
+                assert self._client is not None
+                result = await self._client.read_coils(
+                    address=address,
+                    count=count,
+                    **self._unit_kwargs(self._client.read_coils),
+                )
+            except ModbusException as err:
+                LOGGER.error("Modbus coil read failed: %s", err)
+                raise
+            if result.isError():
+                LOGGER.warning("Modbus coil read error at %s: %s", address, result)
+                return None
+            return list(result.bits)[:count]
+
     async def write_register(self, address: int, value: int) -> None:
         """Write a single holding register."""
         address += REGISTER_OFFSET

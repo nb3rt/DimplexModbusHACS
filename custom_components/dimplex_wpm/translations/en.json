@@ -3,101 +3,54 @@
   "config": {
     "step": {
       "user": {
-        "title": "Dimplex WPM",
-        "description": "Connect to your Dimplex WPM/NWPM controller.",
+        "title": "Connect to Dimplex WPM",
+        "description": "Connect to your Dimplex WPM/NWPM controller over Modbus TCP.",
         "data": {
           "host": "Host",
           "port": "Port",
           "unit_id": "Unit ID",
+          "profile": "Heat-pump model (profile)",
+          "software_version": "WPM software version (H/J/L/M)",
           "scan_interval": "Scan interval (seconds)",
-          "timeout": "Timeout (seconds)",
-          "software_version": "Software version (H/J/L/M)",
-          "register_strategy": "Register bank strategy"
+          "timeout": "Timeout (seconds)"
+        }
+      },
+      "features": {
+        "title": "Installed modules & metering",
+        "description": "Select the modules your installation has and which meters are present. Suggestions are pre-filled from a probe of the device. Without a meter, the corresponding value is estimated.",
+        "data": {
+          "enabled_modules": "Optional modules present",
+          "has_electric_meter": "Electrical power meter present (register 5170)",
+          "has_heat_meter": "Heat meter present (registers 5168/5096-5129)",
+          "has_flow_sensor": "External flow sensor present",
+          "flow_sensor_entity": "Flow sensor entity (optional)",
+          "has_inverter_freq": "Inverter frequency available (register 114)",
+          "include_re_registers": "Include reverse-engineered registers"
         }
       }
     },
     "error": {
-      "cannot_connect": "Unable to connect to device"
+      "cannot_connect": "Unable to connect to the device"
     },
     "abort": {
-      "already_configured": "Device is already configured"
+      "already_configured": "This device is already configured"
     }
   },
   "options": {
     "step": {
       "init": {
+        "title": "Dimplex WPM options",
         "data": {
           "scan_interval": "Scan interval (seconds)",
-          "enable_write_entities": "Enable write entities",
-          "enable_ems_entities": "Enable EMS entities",
-          "enable_bms_temp": "Enable BMS outdoor temperature entity",
-          "enable_external_lock": "Enable external lock entity"
+          "enabled_modules": "Optional modules present",
+          "has_electric_meter": "Electrical power meter present (register 5170)",
+          "has_heat_meter": "Heat meter present (registers 5168/5096-5129)",
+          "has_flow_sensor": "External flow sensor present",
+          "flow_sensor_entity": "Flow sensor entity (optional)",
+          "has_inverter_freq": "Inverter frequency available (register 114)",
+          "include_re_registers": "Include reverse-engineered registers",
+          "enable_write_entities": "Enable control / write entities (advanced)"
         }
-      }
-    }
-  },
-  "entity": {
-    "sensor": {
-      "controller_info": {
-        "name": "Controller info"
-      },
-      "outdoor_temperature": {
-        "name": "Outdoor temperature"
-      },
-      "return_temperature": {
-        "name": "Return temperature"
-      },
-      "return_setpoint_temperature": {
-        "name": "Return setpoint temperature"
-      },
-      "flow_temperature": {
-        "name": "Flow temperature"
-      },
-      "dhw_temperature": {
-        "name": "DHW temperature"
-      },
-      "status_code": {
-        "name": "Status code"
-      },
-      "status_text": {
-        "name": "Status"
-      },
-      "lock_code": {
-        "name": "Lock code"
-      },
-      "lock_text": {
-        "name": "Lock"
-      },
-      "fault_code": {
-        "name": "Fault code"
-      },
-      "fault_text": {
-        "name": "Fault"
-      },
-      "sensor_error_code": {
-        "name": "Sensor error code"
-      },
-      "sensor_error_text": {
-        "name": "Sensor error"
-      },
-      "sg_ready_code": {
-        "name": "SG Ready code"
-      },
-      "sg_ready_text": {
-        "name": "SG Ready state"
-      }
-    },
-    "binary_sensor": {
-      "fault_active": {
-        "name": "Fault active"
-      },
-      "lock_active": {
-        "name": "Lock active"
-      }
-    },
-    "select": {
-      "sg_ready_mode": {
-        "name": "SG Ready mode"
       }
     }
   }

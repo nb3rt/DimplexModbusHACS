@@ -15,9 +15,8 @@ from .const import (
     CONF_ENABLE_WRITE_ENTITIES,
     DEFAULT_ENABLE_WRITE,
     DOMAIN,
-    MODULE_SG,
+    MODULE_ROOT,
     REG_SG_READY_MODE,
-    SG_READY_MAP,
     SG_READY_REVERSE,
 )
 from .device import build_device_info
@@ -35,7 +34,16 @@ async def async_setup_entry(
 
     if allow_write:
         async_add_entities(
-            [DimplexSGReadySelect(coordinator, entry, allow_write)],
+            [
+                DimplexSGReadySelect(
+                    coordinator,
+                    entry,
+                    allow_write,
+                    host=data.get("host"),
+                    software_version=data.get("software_version"),
+                    model=data.get("model"),
+                )
+            ],
         )
 
 
@@ -45,18 +53,35 @@ class DimplexSGReadySelect(CoordinatorEntity, SelectEntity):
     _attr_has_entity_name = True
     _attr_translation_key = "sg_ready_mode"
 
-    def __init__(self, coordinator, entry: ConfigEntry, allow_write: bool) -> None:
+    def __init__(
+        self,
+        coordinator,
+        entry: ConfigEntry,
+        allow_write: bool,
+        *,
+        host: str | None = None,
+        software_version: str | None = None,
+        model: str | None = None,
+    ) -> None:
         super().__init__(coordinator)
         self._entry = entry
         self._allow_write = allow_write
-        self._attr_unique_id = f"{entry.entry_id}_{MODULE_SG}_sg_ready_mode"
-        self._attr_device_info = build_device_info(entry, MODULE_SG)
+        self._attr_unique_id = f"{entry.entry_id}_{MODULE_ROOT}_sg_ready_mode"
+        configuration_url = f"http://{host}" if host else None
+        self._attr_device_info = build_device_info(
+            entry,
+            MODULE_ROOT,
+            host=host,
+            configuration_url=configuration_url,
+            software_version=software_version,
+            model=model,
+        )
 
     @property
     def current_option(self) -> str | None:
         if not self.coordinator.data:
             return None
-        return self.coordinator.data["derived"].get("sg_ready_text")
+        return self.coordinator.data.get("values", {}).get("sg_ready_text")
 
     @property
     def options(self) -> list[str]:

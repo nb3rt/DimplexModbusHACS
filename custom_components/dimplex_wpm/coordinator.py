@@ -1,4 +1,4 @@
-"""Data update coordinator for the integration."""
+"""Data update coordinator — register-table driven."""
 
 from __future__ import annotations
 
@@ -11,46 +11,23 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 
-from .const import (
-    DEFAULT_SCAN_INTERVAL,
-    FAULT_MAP_BY_VERSION,
-    REG_FAULT_CODE,
-    LOCK_MAP_BY_VERSION,
-    REG_LOCK_CODE,
-    REG_DHW_TEMPERATURE,
-    REG_FLOW_TEMPERATURE,
-    REG_OUTDOOR_TEMPERATURE,
-    REG_RETURN_SETPOINT_TEMPERATURE,
-    REG_RETURN_TEMPERATURE,
-    REG_SG_READY_MODE,
-    SENSOR_ERROR_MAP_BY_VERSION,
-    REG_SENSOR_ERROR_CODE,
-    REG_STATUS_CODE,
-    SG_READY_MAP,
-    STATUS_MAP_BY_VERSION,
-)
+from .const import DEFAULT_SCAN_INTERVAL, get_enum_map
 from .modbus_client import DimplexModbusClient
+from .registers import (
+    COIL,
+    HOLDING,
+    active_energy_groups,
+    active_registers,
+    build_read_plan,
+    decode_value,
+    energy_total_kwh,
+)
 
 LOGGER = logging.getLogger(__name__)
 
 
-def _map_code(value: int, mapping: dict[int, str]) -> str:
-    """Return a mapped string or fallback."""
-    if value in mapping:
-        return mapping[value]
-    return f"Unknown ({value})"
-
-
-def _decode_temperature(value: int) -> float:
-    """Decode a signed temperature with 0.1 precision."""
-    # Values are int16 with scale 0.1
-    if value > 32767:
-        value -= 65536
-    return round(value * 0.1, 1)
-
-
 class DimplexDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
-    """Coordinate data fetching from the Modbus client."""
+    """Coordinate Modbus reads and decode them into a flat ``values`` map."""
 
     def __init__(
         self,
@@ -58,11 +35,14 @@ class DimplexDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         client: DimplexModbusClient,
         *,
         scan_interval: int = DEFAULT_SCAN_INTERVAL,
-        register_strategy: str = "holding",
+        software_version: str,
+        enabled_modules: frozenset[str],
+        capabilities: frozenset[str],
+        include_re: bool,
         host: str | None = None,
         port: int | None = None,
         unit_id: int | None = None,
-        software_version: str | None = None,
+        profile_name: str | None = None,
     ) -> None:
         super().__init__(
             hass,
@@ -71,70 +51,67 @@ class DimplexDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             update_interval=timedelta(seconds=scan_interval),
         )
         self._client = client
-        self._register_strategy = register_strategy
+        self.software_version = software_version
+        self.enabled_modules = enabled_modules
+        self.capabilities = capabilities
+
+        self.specs = active_registers(
+            version=software_version,
+            enabled_modules=enabled_modules,
+            capabilities=capabilities,
+            include_re=include_re,
+        )
+        self.energy_groups = active_energy_groups(
+            enabled_modules=enabled_modules, capabilities=capabilities
+        )
+        self._plan = build_read_plan(self.specs, self.energy_groups, software_version)
+
         self._connection_info = {
             "host": host,
             "port": port,
             "unit_id": unit_id,
-            "register_strategy": register_strategy,
             "software_version": software_version,
+            "profile": profile_name,
         }
-        self._software_version = software_version
         self._consecutive_failures = 0
 
     async def _async_update_data(self) -> dict[str, Any]:
-        """Fetch data from Modbus and return structured payload."""
         try:
-            raw = await self._read_registers()
+            holding, coils = await self._execute_plan()
         except Exception as err:
             self._consecutive_failures += 1
             raise UpdateFailed(f"Error communicating with Modbus device: {err}") from err
         self._consecutive_failures = 0
 
-        derived: dict[str, Any] = {}
-        if REG_OUTDOOR_TEMPERATURE in raw:
-            derived["outdoor_temperature"] = _decode_temperature(
-                raw[REG_OUTDOOR_TEMPERATURE]
-            )
-        if REG_RETURN_TEMPERATURE in raw:
-            derived["return_temperature"] = _decode_temperature(raw[REG_RETURN_TEMPERATURE])
-        if REG_RETURN_SETPOINT_TEMPERATURE in raw:
-            derived["return_setpoint_temperature"] = _decode_temperature(
-                raw[REG_RETURN_SETPOINT_TEMPERATURE]
-            )
-        if REG_FLOW_TEMPERATURE in raw:
-            derived["flow_temperature"] = _decode_temperature(raw[REG_FLOW_TEMPERATURE])
-        if REG_DHW_TEMPERATURE in raw:
-            derived["dhw_temperature"] = _decode_temperature(raw[REG_DHW_TEMPERATURE])
+        values: dict[str, Any] = {"controller_info": "online"}
 
-        status_map = STATUS_MAP_BY_VERSION.get(
-            self._software_version, STATUS_MAP_BY_VERSION["H"]
-        )
-        lock_map = LOCK_MAP_BY_VERSION.get(
-            self._software_version, LOCK_MAP_BY_VERSION["H"]
-        )
-        fault_map = FAULT_MAP_BY_VERSION.get(
-            self._software_version, FAULT_MAP_BY_VERSION["H"]
-        )
-        sensor_error_map = SENSOR_ERROR_MAP_BY_VERSION.get(
-            self._software_version, SENSOR_ERROR_MAP_BY_VERSION["H"]
-        )
+        for spec in self.specs:
+            addr = spec.resolve_address(self.software_version)
+            if addr is None:
+                continue
+            if spec.obj == COIL:
+                if addr in coils:
+                    values[spec.key] = bool(coils[addr])
+                continue
+            if addr not in holding:
+                continue
+            raw = holding[addr]
+            if spec.enum:
+                mapping = get_enum_map(spec.enum, self.software_version)
+                values[spec.key] = mapping.get(raw, f"Unknown ({raw})")
+            else:
+                values[spec.key] = decode_value(spec, raw)
 
-        if REG_STATUS_CODE in raw:
-            derived["status_text"] = _map_code(raw[REG_STATUS_CODE], status_map)
-        if REG_SENSOR_ERROR_CODE in raw:
-            derived["sensor_error_text"] = _map_code(
-                raw[REG_SENSOR_ERROR_CODE],
-                sensor_error_map,
-            )
-        if REG_SG_READY_MODE in raw:
-            derived["sg_ready_text"] = _map_code(raw[REG_SG_READY_MODE], SG_READY_MAP)
-        if REG_LOCK_CODE in raw:
-            derived["lock_text"] = _map_code(raw[REG_LOCK_CODE], lock_map)
-            derived["lock_active"] = raw[REG_LOCK_CODE] != 0
-        if REG_FAULT_CODE in raw:
-            derived["fault_text"] = _map_code(raw[REG_FAULT_CODE], fault_map)
-            derived["fault_active"] = raw[REG_FAULT_CODE] != 0
+        for group in self.energy_groups:
+            regs = [holding.get(r) for r in group.registers]
+            if all(r is not None for r in regs):
+                values[group.key] = energy_total_kwh(*regs)  # type: ignore[arg-type]
+
+        # Derived problem flags from the raw codes.
+        if "fault_code" in values:
+            values["fault_active"] = values["fault_code"] != 0
+        if "lock_code" in values:
+            values["lock_active"] = values["lock_code"] != 0
 
         meta = {
             "last_update": dt_util.utcnow().isoformat(),
@@ -142,34 +119,30 @@ class DimplexDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             "consecutive_failures": self._consecutive_failures,
             **self._connection_info,
         }
+        return {"values": values, "raw_holding": holding, "raw_coils": coils, "meta": meta}
 
-        return {"raw": raw, "derived": derived, "meta": meta}
-
-    async def _read_registers(self) -> dict[int, int]:
-        """Read registers according to configured strategy."""
-        # Minimal set of contiguous ranges to reduce calls.
-        ranges = [
-            (REG_OUTDOOR_TEMPERATURE, 6),  # 1-6 includes temperatures
-            (REG_RETURN_SETPOINT_TEMPERATURE, 1),
-            (REG_STATUS_CODE, 4),  # 103-106 codes
-            (REG_SG_READY_MODE, 1),
-        ]
-
-        strategy = "holding" if self._register_strategy == "holding" else "input"
-
-        if self._register_strategy == "auto":
-            # Try input registers first, fall back to holding on failure.
-            try:
-                raw = await self._client.read_ranges(ranges, "input")
-                if raw:
-                    return raw
-            except Exception as err:
-                LOGGER.debug("Input register read failed (%s), retrying as holding", err)
-            return await self._client.read_ranges(ranges, "holding")
-
-        return await self._client.read_ranges(ranges, strategy)
+    async def _execute_plan(self) -> tuple[dict[int, int], dict[int, bool]]:
+        holding: dict[int, int] = {}
+        coils: dict[int, bool] = {}
+        for obj, start, count in self._plan:
+            if obj == HOLDING:
+                data = await self._client.read_holding_registers(start, count)
+                if data:
+                    for offset, value in enumerate(data):
+                        holding[start + offset] = value
+            elif obj == COIL:
+                bits = await self._client.read_coils(start, count)
+                if bits:
+                    for offset, value in enumerate(bits):
+                        coils[start + offset] = bool(value)
+        return holding, coils
 
     @property
+    def write_register(self) -> Callable[[int, int], Any]:
+        """Return helper for writing a holding register (used by M2 controls)."""
+        return self._client.write_register
+
+    # Backwards-compatible alias used by the SG Ready select.
+    @property
     def write_sg_ready(self) -> Callable[[int, int], Any]:
-        """Return helper for writing SG Ready values."""
         return self._client.write_register

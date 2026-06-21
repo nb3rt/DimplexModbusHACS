@@ -6,7 +6,13 @@ from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 
-from .const import DEVICE_MANUFACTURER, DOMAIN, MODULE_NAME_MAP, MODULE_ROOT
+from .const import (
+    DEVICE_MANUFACTURER,
+    DEVICE_NAME,
+    DOMAIN,
+    MODULE_NAME_MAP,
+    MODULE_ROOT,
+)
 
 
 def build_device_info(
@@ -16,13 +22,20 @@ def build_device_info(
     host: str | None = None,
     configuration_url: str | None = None,
     software_version: str | None = None,
+    model: str | None = None,
 ) -> dict[str, Any]:
-    """Return device info for the requested module."""
+    """Return device info for the requested module (medium device tree)."""
     base_identifier = (DOMAIN, entry.entry_id)
-    identifiers = {base_identifier} if module == MODULE_ROOT else {(DOMAIN, f"{entry.entry_id}_{module}")}
-    name = MODULE_NAME_MAP.get(module, MODULE_NAME_MAP[MODULE_ROOT])
-    if module == MODULE_ROOT and host:
-        name = f"{name} ({host})"
+    if module == MODULE_ROOT:
+        identifiers = {base_identifier}
+    else:
+        identifiers = {(DOMAIN, f"{entry.entry_id}_{module}")}
+
+    if module == MODULE_ROOT:
+        name = f"{DEVICE_NAME} ({host})" if host else DEVICE_NAME
+    else:
+        name = MODULE_NAME_MAP.get(module, module)
+
     device_info: dict[str, Any] = {
         "identifiers": identifiers,
         "manufacturer": DEVICE_MANUFACTURER,
@@ -31,10 +44,12 @@ def build_device_info(
     if configuration_url:
         device_info["configuration_url"] = configuration_url
 
-    if module == MODULE_ROOT and software_version:
-        device_info["sw_version"] = software_version
-
-    if module != MODULE_ROOT:
+    if module == MODULE_ROOT:
+        if software_version:
+            device_info["sw_version"] = software_version
+        if model:
+            device_info["model"] = model
+    else:
         device_info["via_device"] = base_identifier
 
     return device_info
