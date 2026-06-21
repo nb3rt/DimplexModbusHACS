@@ -12,6 +12,7 @@ from .const import (
     CAPABILITY_CONF_MAP,
     CONF_ENABLE_WRITE_ENTITIES,
     CONF_ENABLED_MODULES,
+    CONF_FLOW_SENSOR_ENTITY,
     CONF_INCLUDE_RE_REGISTERS,
     CONF_PROFILE,
     CONF_SCAN_INTERVAL,
@@ -34,7 +35,12 @@ from .registers import CAP_INVERTER_FREQ, CORE_MODULES
 
 LOGGER = logging.getLogger(__name__)
 
-PLATFORMS = [Platform.SENSOR, Platform.BINARY_SENSOR, Platform.SELECT]
+PLATFORMS = [
+    Platform.SENSOR,
+    Platform.BINARY_SENSOR,
+    Platform.NUMBER,
+    Platform.SELECT,
+]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -74,10 +80,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         enabled_modules=enabled_modules,
         capabilities=capabilities,
         include_re=include_re,
+        profile=profile,
+        flow_sensor_entity=source.get(CONF_FLOW_SENSOR_ENTITY) or None,
         host=host,
         port=port,
         unit_id=unit_id,
-        profile_name=profile.key,
     )
 
     await coordinator.async_config_entry_first_refresh()

@@ -49,21 +49,8 @@ CONF_UNIT_ID: Final = "unit_id"
 CONF_SCAN_INTERVAL: Final = "scan_interval"
 CONF_TIMEOUT: Final = "timeout"
 CONF_SOFTWARE_VERSION: Final = "software_version"
-CONF_REGISTER_STRATEGY: Final = "register_strategy"
+# Master gate for control/write entities (M2). Calibration numbers are NOT gated.
 CONF_ENABLE_WRITE_ENTITIES: Final = "enable_write_entities"
-CONF_ENABLE_EMS: Final = "enable_ems_entities"
-CONF_ENABLE_BMS_TEMP: Final = "enable_bms_temp"
-CONF_ENABLE_EXTERNAL_LOCK: Final = "enable_external_lock"
-
-REGISTER_STRATEGY_AUTO: Final = "auto"
-REGISTER_STRATEGY_HOLDING: Final = "holding"
-REGISTER_STRATEGY_INPUT: Final = "input"
-
-REGISTER_STRATEGY_MAP: Final = {
-    REGISTER_STRATEGY_AUTO: REGISTER_STRATEGY_AUTO,
-    REGISTER_STRATEGY_HOLDING: REGISTER_STRATEGY_HOLDING,
-    REGISTER_STRATEGY_INPUT: REGISTER_STRATEGY_INPUT,
-}
 
 SOFTWARE_VERSIONS: Final = ["H", "J", "L", "M"]
 
