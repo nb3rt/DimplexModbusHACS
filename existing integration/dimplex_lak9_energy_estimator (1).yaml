@@ -1,0 +1,292 @@
+#############################################
+# DIMPLEX LAK9 — ELEKTRYKA (ENERGY-DASHBOARD READY)
+#
+# Daje:
+# - Power: sprężarka / grzałka / total (W + kW)
+# - Energy: sprężarka / grzałka / total (kWh) + wrappery [ED] do Energy Dashboard
+# - Utility meters (daily/monthly/yearly) do raportów
+#
+# Wejścia:
+# - sensor.dimplex_inverter_frequency (Hz)
+# - sensor.dimplex_status_messages (INT)
+# - binary_sensor.dimplex_output_2nd_heat_generator (on/off)
+#############################################
+
+############################
+# 1) HELPERS (UI)
+############################
+input_number:
+  dimplex_k_dhw:
+    name: "LAK9 k_dhw (multiplier)"
+    min: 0.90
+    max: 1.20
+    step: 0.01
+    mode: box
+    unit_of_measurement: ""
+    initial: 1.00
+
+  dimplex_k_defrost:
+    name: "LAK9 k_defrost (multiplier)"
+    min: 0.90
+    max: 1.30
+    step: 0.01
+    mode: box
+    unit_of_measurement: ""
+    initial: 1.05
+
+  dimplex_heater_2nd_power_w:
+    name: "LAK9 2nd source heater power"
+    min: 0
+    max: 8000
+    step: 50
+    mode: box
+    unit_of_measurement: W
+    initial: 6000
+
+  dimplex_pump_main_power_w:
+    name: "LAK9 main pump power (optional)"
+    min: 0
+    max: 400
+    step: 5
+    mode: box
+    unit_of_measurement: W
+    initial: 0
+
+  dimplex_pump_floor_power_w:
+    name: "LAK9 floor pump power (optional)"
+    min: 0
+    max: 400
+    step: 5
+    mode: box
+    unit_of_measurement: W
+    initial: 0
+
+input_boolean:
+  dimplex_include_pumps_in_total:
+    name: "LAK9 include pump power in TOTAL (optional)"
+    icon: mdi:pump
+    initial: false
+
+
+############################
+# 2) TEMPLATE (JEDEN BLOK)
+############################
+template:
+  - sensor:
+
+      # 2.1 LUT: Hz -> W (sprężarka) — baza
+      - name: "LAK9 Compressor Power LUT (base)"
+        unique_id: lak9_compressor_power_lut_base
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: >
+          {% set hz = states('sensor.dimplex_inverter_frequency') | float(0) %}
+          {% if hz <= 0 %}
+            0
+          {% else %}
+            {% set pts = [
+              (32,1050),(35,1110),(39,1190),(41,1290),
+              (45,1340),(49,1500),(53,1570),(57,1720),
+              (61,1850),(63,1940),(65,2010),(67,2050),
+              (71,2200),(75,2320),(79,2450),(83,2550)
+            ] %}
+            {% set x = hz %}
+            {% if x < pts[0][0] %}{% set x = pts[0][0] %}{% endif %}
+            {% if x > pts[-1][0] %}{% set x = pts[-1][0] %}{% endif %}
+            {% set ns = namespace(y=0) %}
+            {% for i in range(0, pts|length - 1) %}
+              {% set x0 = pts[i][0] %}{% set y0 = pts[i][1] %}
+              {% set x1 = pts[i+1][0] %}{% set y1 = pts[i+1][1] %}
+              {% if x >= x0 and x <= x1 %}
+                {% set ns.y = y0 + (y1 - y0) * ((x - x0) / (x1 - x0)) %}
+              {% endif %}
+            {% endfor %}
+            {{ ns.y | round(0) }}
+          {% endif %}
+
+      # 2.2 Sprężarka: status-aware + mnożniki DHW/Defrost
+      - name: "LAK9 Compressor Power Estimated"
+        unique_id: lak9_compressor_power_estimated
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: >
+          {% set base = states('sensor.lak9_compressor_power_lut_base') | float(0) %}
+          {% set sc = states('sensor.dimplex_status_messages') | int(-1) %}
+          {% set k_defrost = states('input_number.dimplex_k_defrost') | float(1.05) %}
+          {% set k_dhw = states('input_number.dimplex_k_dhw') | float(1.00) %}
+          {% if base <= 0 %}
+            0
+          {% elif sc in [0, 1, 30, 11] %}
+            0
+          {% elif sc == 10 %}
+            {{ (base * k_defrost) | round(0) }}
+          {% elif sc == 4 %}
+            {{ (base * k_dhw) | round(0) }}
+          {% else %}
+            {{ base | round(0) }}
+          {% endif %}
+
+      - name: "LAK9 Compressor Power Estimated (kW)"
+        unique_id: lak9_compressor_power_estimated_kw
+        unit_of_measurement: "kW"
+        device_class: power
+        state_class: measurement
+        state: >
+          {{ (states('sensor.lak9_compressor_power_estimated') | float(0) / 1000) | round(3) }}
+
+      # 2.3 Grzałka: 0 / stała moc
+      - name: "LAK9 Heater Power Estimated"
+        unique_id: lak9_heater_power_estimated
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: >
+          {% set p = states('input_number.dimplex_heater_2nd_power_w') | float(6000) %}
+          {% if is_state('binary_sensor.dimplex_output_2nd_heat_generator', 'on') %}
+            {{ p | round(0) }}
+          {% else %}
+            0
+          {% endif %}
+
+      - name: "LAK9 Heater Power Estimated (kW)"
+        unique_id: lak9_heater_power_estimated_kw
+        unit_of_measurement: "kW"
+        device_class: power
+        state_class: measurement
+        state: >
+          {{ (states('sensor.lak9_heater_power_estimated') | float(0) / 1000) | round(3) }}
+
+      # 2.4 Pompy (opcjonalnie): stała moc, tylko do TOTAL
+      - name: "LAK9 Pump Power Estimated (optional)"
+        unique_id: lak9_pump_power_estimated_optional
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: >
+          {% if is_state('input_boolean.dimplex_include_pumps_in_total', 'on') %}
+            {% set p1 = states('input_number.dimplex_pump_main_power_w') | float(0) %}
+            {% set p2 = states('input_number.dimplex_pump_floor_power_w') | float(0) %}
+            {{ (p1 + p2) | round(0) }}
+          {% else %}
+            0
+          {% endif %}
+
+      # 2.5 TOTAL: sprężarka + grzałka + pompy(opcjonalnie)
+      - name: "LAK9 Total Power Estimated"
+        unique_id: lak9_total_power_estimated
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: >
+          {% set p_comp = states('sensor.lak9_compressor_power_estimated') | float(0) %}
+          {% set p_heat = states('sensor.lak9_heater_power_estimated') | float(0) %}
+          {% set p_pump = states('sensor.lak9_pump_power_estimated_optional') | float(0) %}
+          {{ (p_comp + p_heat + p_pump) | round(0) }}
+
+      - name: "LAK9 Total Power Estimated (kW)"
+        unique_id: lak9_total_power_estimated_kw
+        unit_of_measurement: "kW"
+        device_class: power
+        state_class: measurement
+        state: >
+          {{ (states('sensor.lak9_total_power_estimated') | float(0) / 1000) | round(3) }}
+
+      #########################################################
+      # 2.6 ENERGY DASHBOARD WRAPPERS [ED]
+      # (te trzy encje wybierasz w Energy Dashboard)
+      #########################################################
+      - name: "LAK9 Energy TOTAL (kWh) [ED]"
+        unique_id: lak9_energy_total_kwh_ed
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: total_increasing
+        state: "{{ states('sensor.lak9_total_energy_kwh') | float(0) }}"
+
+      - name: "LAK9 Energy Compressor (kWh) [ED]"
+        unique_id: lak9_energy_compressor_kwh_ed
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: total_increasing
+        state: "{{ states('sensor.lak9_compressor_energy_kwh') | float(0) }}"
+
+      - name: "LAK9 Energy Heater (kWh) [ED]"
+        unique_id: lak9_energy_heater_kwh_ed
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: total_increasing
+        state: "{{ states('sensor.lak9_heater_energy_kwh') | float(0) }}"
+
+
+############################
+# 3) ENERGIA (kWh) — integracja mocy
+############################
+sensor:
+  - platform: integration
+    name: "LAK9 Compressor Energy (kWh)"
+    unique_id: lak9_compressor_energy_kwh
+    source: sensor.lak9_compressor_power_estimated
+    unit_prefix: k
+    unit_time: h
+    method: trapezoidal
+
+  - platform: integration
+    name: "LAK9 Heater Energy (kWh)"
+    unique_id: lak9_heater_energy_kwh
+    source: sensor.lak9_heater_power_estimated
+    unit_prefix: k
+    unit_time: h
+    method: left
+
+  - platform: integration
+    name: "LAK9 Total Energy (kWh)"
+    unique_id: lak9_total_energy_kwh
+    source: sensor.lak9_total_power_estimated
+    unit_prefix: k
+    unit_time: h
+    method: trapezoidal
+
+
+############################
+# 4) UTILITY METERS (daily / monthly / yearly) — raporty
+############################
+utility_meter:
+  lak9_total_energy_daily:
+    name: "LAK9 Total Energy Daily"
+    source: sensor.lak9_energy_total_kwh_ed
+    cycle: daily
+  lak9_total_energy_monthly:
+    name: "LAK9 Total Energy Monthly"
+    source: sensor.lak9_energy_total_kwh_ed
+    cycle: monthly
+  lak9_total_energy_yearly:
+    name: "LAK9 Total Energy Yearly"
+    source: sensor.lak9_energy_total_kwh_ed
+    cycle: yearly
+
+  lak9_compressor_energy_daily:
+    name: "LAK9 Compressor Energy Daily"
+    source: sensor.lak9_energy_compressor_kwh_ed
+    cycle: daily
+  lak9_compressor_energy_monthly:
+    name: "LAK9 Compressor Energy Monthly"
+    source: sensor.lak9_energy_compressor_kwh_ed
+    cycle: monthly
+  lak9_compressor_energy_yearly:
+    name: "LAK9 Compressor Energy Yearly"
+    source: sensor.lak9_energy_compressor_kwh_ed
+    cycle: yearly
+
+  lak9_heater_energy_daily:
+    name: "LAK9 Heater Energy Daily"
+    source: sensor.lak9_energy_heater_kwh_ed
+    cycle: daily
+  lak9_heater_energy_monthly:
+    name: "LAK9 Heater Energy Monthly"
+    source: sensor.lak9_energy_heater_kwh_ed
+    cycle: monthly
+  lak9_heater_energy_yearly:
+    name: "LAK9 Heater Energy Yearly"
+    source: sensor.lak9_energy_heater_kwh_ed
+    cycle: yearly

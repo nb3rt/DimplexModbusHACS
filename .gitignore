@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# Claude Code session/local state
+.claude/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/

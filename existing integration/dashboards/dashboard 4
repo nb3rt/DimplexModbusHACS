@@ -1,0 +1,23 @@
+type: sections
+max_columns: 4
+title: Parameters
+path: parameters
+sections:
+  - type: grid
+    cards:
+      - type: entities
+        entities:
+          - entity: input_number.lak9_defrost_heat_factor
+          - entity: input_number.lak9_alpha_base
+          - entity: input_number.lak9_alpha_sensitivity
+          - entity: input_number.lak9_alpha_deadband
+          - entity: input_boolean.lak9_enable_house_split
+          - entity: input_number.dimplex_heater_2nd_power_w
+          - entity: input_number.dimplex_pump_floor_power_w
+          - entity: input_boolean.dimplex_include_pumps_in_total
+          - entity: input_number.dimplex_k_defrost
+          - entity: input_number.dimplex_k_dhw
+          - entity: input_number.dimplex_pump_main_power_w
+      - type: heading
+        heading: New section
+cards: []

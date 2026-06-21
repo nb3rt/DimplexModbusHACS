@@ -1,0 +1,75 @@
+title: Dimplex
+path: dimplex
+icon: mdi:heat-pump
+cards:
+  - type: history-graph
+    title: Dimplex – status (6h)
+    hours_to_show: 6
+    refresh_interval: 60
+    entities:
+      - entity: sensor.dimplex_status_text
+      - entity: sensor.dimplex_lock_text
+      - entity: sensor.dimplex_fault_text
+      - entity: binary_sensor.dimplex_output_2nd_heat_generator
+      - entity: sensor.dimplex_sg_ready_state_inputs
+        name: SG Ready (inputs 3/4)
+  - type: entities
+    title: Dimplex – status
+    show_header_toggle: false
+    entities:
+      - entity: sensor.dimplex_outdoor_temperature
+        name: Outdoor Temperature
+        icon: mdi:home-thermometer
+      - entity: sensor.dimplex_flow_temperature
+        name: Flow Temperature
+        icon: mdi:thermometer
+      - entity: sensor.dimplex_return_setpoint_temperature
+        name: Return set temperature
+        icon: mdi:thermometer-check
+      - entity: sensor.dimplex_return_temperature
+        name: Return temperature
+        icon: mdi:thermometer
+      - entity: sensor.dimplex_dhw_temperature
+        icon: mdi:water-thermometer
+        name: Hot water temperature
+      - entity: sensor.dimplex_status_text
+        name: Operating status
+        secondary_info: last-changed
+      - entity: sensor.dimplex_lock_text
+        name: Lock status
+        secondary_info: last-updated
+      - entity: sensor.dimplex_fault_text
+        name: Fault status
+        secondary_info: last-updated
+      - entity: binary_sensor.dimplex_output_2nd_heat_generator
+        secondary_info: last-updated
+      - entity: sensor.dimplex_runtime_2nd_heat_generator
+      - entity: binary_sensor.dimplex_any_lock_active
+        name: Any lock active
+      - entity: binary_sensor.dimplex_any_fault_active
+        name: Any fault active
+      - entity: sensor.dimplex_sg_ready_mode_text
+        name: SG Ready mode
+      - entity: input_select.sg_ready_mode
+        name: SG Ready mode (set)
+      - entity: binary_sensor.dimplex_smartgrid_input_1
+        name: SG Line 1
+      - entity: binary_sensor.dimplex_smartgrid_input_2
+        name: SG Line 2
+      - entity: sensor.dimplex_sg_ready_state_inputs
+        name: SG Ready state (inputs 3/4)
+  - type: history-graph
+    title: Dimplex – temperatures 6h
+    refresh_interval: 60
+    entities:
+      - entity: sensor.dimplex_outdoor_temperature
+        name: Outdoor
+      - entity: sensor.dimplex_return_setpoint_temperature
+        name: Return setpoint
+      - entity: sensor.dimplex_return_temperature
+        name: Return
+      - entity: sensor.dimplex_flow_temperature
+        name: Flow
+      - entity: sensor.dimplex_dhw_temperature
+        name: DHW
+    hours_to_show: 6

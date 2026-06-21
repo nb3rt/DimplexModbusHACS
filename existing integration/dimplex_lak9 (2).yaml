@@ -1,0 +1,997 @@
+modbus:
+  - name: dimplex_lak9
+    type: tcp
+    host: 192.168.1.103      # IP of WPM / Dimplex module
+    port: 502
+    delay: 2
+    timeout: 3
+
+    sensors:
+
+      # ===== System status (bit / enum codes) =====
+      - name: "Dimplex Status Messages"
+        address: 103
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: ""
+        scan_interval: 10
+        unique_id: dimplex_status_messages
+
+      - name: "Dimplex Lock Messages"
+        address: 104
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: ""
+        scan_interval: 10
+
+      - name: "Dimplex Fault Messages"
+        address: 105
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: ""
+        scan_interval: 10
+
+      - name: "Dimplex Sensor Errors"
+        address: 106
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: ""
+        scan_interval: 10
+ 
+      - name: "Dimplex Inverter Frequency"
+        address: 114
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "Hz"
+        scale: 0.1
+        precision: 1
+        scan_interval: 60
+        unique_id: dimplex_inverter_frequency
+
+      # ===== Operating mode / party / holiday / ventilation =====
+      - name: "Dimplex Operating Mode"
+        address: 5015
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: ""
+        scan_interval: 10
+
+      - name: "Dimplex Party Mode Hours"
+        address: 5016
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "h"
+        scan_interval: 30
+
+      - name: "Dimplex Holiday Days"
+        address: 5017
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "d"
+        scan_interval: 30
+
+      - name: "Dimplex Ventilation Level"
+        address: 5034
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: ""
+        scan_interval: 30
+
+      - name: "Dimplex Ventilation Boost Time"
+        address: 127
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "min"
+        scan_interval: 60
+
+      # ===== Basic temperatures and humidity =====
+      - name: "Dimplex Outdoor Temperature"
+        address: 1
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "°C"
+        scale: 0.1
+        precision: 1
+        scan_interval: 30
+        unique_id: dimplex_outdoor_temp
+
+      - name: "Dimplex Return Temperature"
+        address: 2
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "°C"
+        scale: 0.1
+        precision: 1
+        scan_interval: 30
+        unique_id: dimplex_return_temp
+        
+      - name: "Dimplex Return Setpoint Temperature"
+        address: 53
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "°C"
+        scale: 0.1
+        precision: 1
+        scan_interval: 30
+
+      - name: "Dimplex DHW Temperature"
+        address: 3
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "°C"
+        scale: 0.1
+        precision: 1
+        scan_interval: 30
+
+      - name: "Dimplex DHW Setpoint Temperature"
+        address: 58
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "°C"
+        scale: 0.1
+        precision: 1
+        scan_interval: 30
+
+      - name: "Dimplex Flow Temperature"
+        address: 5
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "°C"
+        scale: 0.1
+        precision: 1
+        scan_interval: 30
+        unique_id: dimplex_flow_temp
+        
+      - name: "Dimplex Source Inlet Temperature"
+        address: 6
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "°C"
+        scale: 0.1
+        precision: 1
+        scan_interval: 60
+
+      - name: "Dimplex Source Outlet Temperature"
+        address: 7
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "°C"
+        scale: 0.1
+        precision: 1
+        scan_interval: 60
+
+      - name: "Dimplex HC2 Return Setpoint"
+        address: 54
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "°C"
+        scale: 0.1
+        precision: 1
+        scan_interval: 30
+
+      - name: "Dimplex HC2 Return Temperature"
+        address: 9
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "°C"
+        scale: 0.1
+        precision: 1
+        scan_interval: 30
+
+      - name: "Dimplex HC3 Return Setpoint"
+        address: 55
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "°C"
+        scale: 0.1
+        precision: 1
+        scan_interval: 30
+
+      - name: "Dimplex HC3 Return Temperature"
+        address: 10
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "°C"
+        scale: 0.1
+        precision: 1
+        scan_interval: 30
+
+      - name: "Dimplex Room Temperature 1"
+        address: 11
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "°C"
+        scale: 0.1
+        precision: 1
+        scan_interval: 30
+
+      - name: "Dimplex Room Temperature 2"
+        address: 12
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "°C"
+        scale: 0.1
+        precision: 1
+        scan_interval: 30
+
+      - name: "Dimplex Room Humidity 1"
+        address: 13
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "%"
+        scale: 0.1
+        precision: 1
+        scan_interval: 60
+
+      - name: "Dimplex Room Humidity 2"
+        address: 14
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "%"
+        scale: 0.1
+        precision: 1
+        scan_interval: 60
+
+      - name: "Dimplex Passive Cooling Flow Temperature"
+        address: 19
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "°C"
+        scale: 0.1
+        precision: 1
+        scan_interval: 60
+
+      - name: "Dimplex Passive Cooling Return Temperature"
+        address: 20
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "°C"
+        scale: 0.1
+        precision: 1
+        scan_interval: 60
+
+      - name: "Dimplex PassiveActive Primary Return Temperature"
+        address: 21
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "°C"
+        scale: 0.1
+        precision: 1
+        scan_interval: 60
+
+      - name: "Dimplex Solar Collector Temperature"
+        address: 10
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "°C"
+        scale: 0.1
+        precision: 1
+        scan_interval: 60
+
+      - name: "Dimplex Solar Tank Temperature"
+        address: 23
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "°C"
+        scale: 0.1
+        precision: 1
+        scan_interval: 60
+
+      # Ventilation temperatures & speeds
+      - name: "Dimplex Ventilation Outdoor Air Temperature"
+        address: 120
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "°C"
+        scale: 0.1
+        precision: 1
+        scan_interval: 60
+
+      - name: "Dimplex Ventilation Supply Air Temperature"
+        address: 121
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "°C"
+        scale: 0.1
+        precision: 1
+        scan_interval: 60
+
+      - name: "Dimplex Ventilation Extract Air Temperature"
+        address: 122
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "°C"
+        scale: 0.1
+        precision: 1
+        scan_interval: 60
+
+      - name: "Dimplex Ventilation Exhaust Air Temperature"
+        address: 123
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "°C"
+        scale: 0.1
+        precision: 1
+        scan_interval: 60
+
+      - name: "Dimplex Ventilation Supply Fan Speed"
+        address: 125
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "1/min"
+        scan_interval: 60
+
+      - name: "Dimplex Ventilation Extract Fan Speed"
+        address: 126
+        input_type: input
+        data_type: int16
+        unit_of_measurement: "1/min"
+        scan_interval: 60
+
+      # ===== Runtimes (hours) =====
+      - name: "Dimplex Runtime Compressor 1"
+        address: 72
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "h"
+        state_class: total_increasing
+        scan_interval: 300
+
+      - name: "Dimplex Runtime Compressor 2"
+        address: 73
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "h"
+        state_class: total_increasing
+        scan_interval: 300
+
+      - name: "Dimplex Runtime Primary Pump_Fan"
+        address: 74
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "h"
+        state_class: total_increasing
+        scan_interval: 300
+
+      - name: "Dimplex Runtime 2nd Heat Generator"
+        address: 75
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "h"
+        state_class: total_increasing
+        scan_interval: 300
+
+      - name: "Dimplex Runtime Heating Pump M13"
+        address: 76
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "h"
+        state_class: total_increasing
+        scan_interval: 300
+
+      - name: "Dimplex Runtime DHW Pump"
+        address: 77
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "h"
+        state_class: total_increasing
+        scan_interval: 300
+
+      - name: "Dimplex Runtime Immersion Heater"
+        address: 78
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "h"
+        state_class: total_increasing
+        scan_interval: 300
+
+      - name: "Dimplex Runtime Pool Pump"
+        address: 79
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "h"
+        state_class: total_increasing
+        scan_interval: 300
+
+      - name: "Dimplex Runtime Additional Circulation Pump"
+        address: 71
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "h"
+        state_class: total_increasing
+        scan_interval: 300
+
+      # ===== Heat & energy quantities (raw) =====
+      - name: "Dimplex Heating Energy 1_4"
+        address: 5096
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "kWh"
+        state_class: total_increasing
+        scan_interval: 600
+
+      - name: "Dimplex Heating Energy 5_8"
+        address: 5097
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "kWh"
+        state_class: total_increasing
+        scan_interval: 600
+
+      - name: "Dimplex Heating Energy 9_12"
+        address: 5098
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "kWh"
+        state_class: total_increasing
+        scan_interval: 600
+
+      - name: "Dimplex DHW Energy 1_4"
+        address: 5099
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "kWh"
+        state_class: total_increasing
+        scan_interval: 600
+
+      - name: "Dimplex DHW Energy 5_8"
+        address: 5100
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "kWh"
+        state_class: total_increasing
+        scan_interval: 600
+
+      - name: "Dimplex DHW Energy 9_12"
+        address: 5101
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "kWh"
+        state_class: total_increasing
+        scan_interval: 600
+
+      - name: "Dimplex Pool Energy 1_4"
+        address: 5102
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "kWh"
+        state_class: total_increasing
+        scan_interval: 600
+
+      - name: "Dimplex Pool Energy 5_8"
+        address: 5103
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "kWh"
+        state_class: total_increasing
+        scan_interval: 600
+
+      - name: "Dimplex Pool Energy 9_12"
+        address: 5104
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "kWh"
+        state_class: total_increasing
+        scan_interval: 600
+
+      - name: "Dimplex Environmental Energy 1_4"
+        address: 5127
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "kWh"
+        state_class: total_increasing
+        scan_interval: 600
+
+      - name: "Dimplex Environmental Energy 5_8"
+        address: 5128
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "kWh"
+        state_class: total_increasing
+        scan_interval: 600
+
+      - name: "Dimplex Environmental Energy 9_12"
+        address: 5129
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "kWh"
+        state_class: total_increasing
+        scan_interval: 600
+
+      # ===== HC1 settings =====
+      - name: "Dimplex HC1 Curve Offset"
+        address: 5036
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: ""
+        scan_interval: 120
+
+      - name: "Dimplex HC1 Room Temperature Setpoint"
+        address: 46
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "°C"
+        scan_interval: 120
+
+      - name: "Dimplex HC1 Fixed Flow Setpoint"
+        address: 5037
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "°C"
+        scan_interval: 120
+
+      - name: "Dimplex HC1 Heating Curve End"
+        address: 5038
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "°C"
+        scan_interval: 120
+
+      - name: "Dimplex HC1 Hysteresis"
+        address: 47
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "K"
+        scan_interval: 120
+
+      - name: "Dimplex HC1 Cooling Room Setpoint"
+        address: 5043
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "°C"
+        scan_interval: 120
+
+      - name: "Dimplex HC1 Cooling Room Setpoint 35AT"
+        address: 5134
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "°C"
+        scan_interval: 120
+
+      # ===== HC2/3 settings =====
+      - name: "Dimplex HC2_3 Circuit Selection"
+        address: 5082
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: ""
+        scan_interval: 120
+
+      - name: "Dimplex HC2_3 Heating Curve End"
+        address: 5084
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "°C"
+        scan_interval: 120
+
+      - name: "Dimplex HC2_3 Fixed Temperature"
+        address: 5085
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "°C"
+        scan_interval: 120
+
+      - name: "Dimplex HC2_3 Curve Offset"
+        address: 5086
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: ""
+        scan_interval: 120
+
+      - name: "Dimplex HC2_3 Mixer Run Time"
+        address: 5087
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "min"
+        scan_interval: 120
+
+      - name: "Dimplex HC2_3 Mixer Hysteresis"
+        address: 93
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "K"
+        scan_interval: 120
+
+      - name: "Dimplex HC2_3 Maximum Temperature"
+        address: 5088
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "°C"
+        scan_interval: 120
+
+      - name: "Dimplex HC2_3 Cooling Room Setpoint"
+        address: 5089
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "°C"
+        scan_interval: 120
+
+      # ===== DHW settings =====
+      - name: "Dimplex DHW Hysteresis"
+        address: 5045
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "K"
+        scan_interval: 120
+
+      - name: "Dimplex DHW Setpoint"
+        address: 5047
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "°C"
+        scan_interval: 120
+
+      - name: "Dimplex DHW Setpoint Minimum"
+        address: 5145
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "°C"
+        scan_interval: 120
+
+      - name: "Dimplex DHW Setpoint Maximum"
+        address: 5048
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "°C"
+        scan_interval: 120
+
+      # ===== Pool settings =====
+      - name: "Dimplex Pool Hysteresis"
+        address: 5049
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "K"
+        scan_interval: 120
+
+      - name: "Dimplex Pool Setpoint"
+        address: 5051
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "°C"
+        scan_interval: 120
+
+      # ===== 2nd heat generator settings =====
+      - name: "Dimplex 2nd Heat Generator Mixer Hysteresis"
+        address: 48
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "K"
+        scan_interval: 120
+
+      - name: "Dimplex 2nd Heat Generator Parallel Limit Temp"
+        address: 5020
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "°C"
+        scan_interval: 120
+
+      - name: "Dimplex 2nd Heat Generator Mixer Run Time"
+        address: 5021
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "min"
+        scan_interval: 120
+        
+    # ===== Smart Grid / SG Ready – mode register (R/W) =====
+      - name: "Dimplex SG Ready Mode"
+        address: 5167
+        input_type: holding     # ważne: holding, bo rejestr jest zapisywalny
+        data_type: uint16
+        unit_of_measurement: ""
+        scan_interval: 30
+        
+    # ===== Energy management – powers (from M 3.5) =====
+      - name: "Dimplex Heating Power"
+        address: 5168
+        input_type: input        # R only
+        data_type: uint16
+        # Raw value is W/10 => 1 unit = 10 W
+        # kW = value * 10 / 1000 = value * 0.01
+        unit_of_measurement: "kW"
+        scale: 0.01
+        precision: 2
+        scan_interval: 30
+
+      - name: "Dimplex Electrical Power"
+        address: 5170
+        input_type: input
+        data_type: uint16
+        unit_of_measurement: "kW"
+        scale: 0.01
+        precision: 2
+        scan_interval: 30
+
+      - name: "Dimplex PV Surplus"
+        address: 5182
+        input_type: holding      # R/W
+        data_type: uint16
+        unit_of_measurement: "kW"
+        scale: 0.01
+        precision: 2
+        scan_interval: 30
+
+    binary_sensors:
+
+      # ===== Digital inputs =====
+      - name: "Dimplex SmartGrid Input 1"
+        address: 3
+        input_type: coil
+        scan_interval: 5
+
+      - name: "Dimplex SmartGrid Input 2"
+        address: 4
+        input_type: coil
+        scan_interval: 5
+
+      - name: "Dimplex Utility Lockout"
+        address: 5
+        input_type: coil
+        scan_interval: 5
+
+      - name: "Dimplex External Lockout"
+        address: 6
+        input_type: coil
+        scan_interval: 5
+
+      # ===== Digital outputs (actuators) =====
+      - name: "Dimplex Output Compressor 1"
+        address: 41
+        input_type: coil
+        scan_interval: 5
+
+      - name: "Dimplex Output Compressor 2"
+        address: 42
+        input_type: coil
+        scan_interval: 5
+
+      - name: "Dimplex Output Primary Pump_Fan"
+        address: 43
+        input_type: coil
+        scan_interval: 5
+
+      - name: "Dimplex Output 2nd Heat Generator"
+        address: 44
+        input_type: coil
+        scan_interval: 5
+        unique_id: dimplex_output_2nd_heat_generator
+
+      - name: "Dimplex Output Heating Pump M13"
+        address: 45
+        input_type: coil
+        scan_interval: 5
+
+      - name: "Dimplex Output DHW Pump"
+        address: 46
+        input_type: coil
+        scan_interval: 5
+
+      - name: "Dimplex Output Mixer M21 Open"
+        address: 47
+        input_type: coil
+        scan_interval: 5
+
+      - name: "Dimplex Output Mixer M21 Close"
+        address: 48
+        input_type: coil
+        scan_interval: 5
+
+      - name: "Dimplex Output Additional Circulation Pump"
+        address: 49
+        input_type: coil
+        scan_interval: 5
+
+      - name: "Dimplex Output Immersion Heater"
+        address: 50
+        input_type: coil
+        scan_interval: 5
+
+      - name: "Dimplex Output Heating Pump M15"
+        address: 51
+        input_type: coil
+        scan_interval: 5
+
+      - name: "Dimplex Output Mixer M22 Open"
+        address: 52
+        input_type: coil
+        scan_interval: 5
+
+      - name: "Dimplex Output Mixer M22 Close"
+        address: 53
+        input_type: coil
+        scan_interval: 5
+
+      - name: "Dimplex Output Pool Pump"
+        address: 56
+        input_type: coil
+        scan_interval: 5
+
+      - name: "Dimplex Output General Fault"
+        address: 57
+        input_type: coil
+        scan_interval: 5
+
+      - name: "Dimplex Output Heating Pump M14"
+        address: 59
+        input_type: coil
+        scan_interval: 5
+
+      - name: "Dimplex Output Cooling Pump"
+        address: 60
+        input_type: coil
+        scan_interval: 5
+
+      - name: "Dimplex Output Heating Pump M20"
+        address: 61
+        input_type: coil
+        scan_interval: 5
+
+      - name: "Dimplex Output Heat_Cool Changeover"
+        address: 66
+        input_type: coil
+        scan_interval: 5
+
+      - name: "Dimplex Output Primary Cooling Pump"
+        address: 68
+        input_type: coil
+        scan_interval: 5
+
+      - name: "Dimplex Output Solar Pump"
+        address: 71
+        input_type: coil
+        scan_interval: 5
+
+template:
+  - sensor:
+      # ---------- Text mapping for status codes ----------
+      - name: "Dimplex Status Text"
+        unique_id: "dimplex_status_text"
+        icon: mdi:information
+        state: >
+          {% set code = states('sensor.dimplex_status_messages') | int(-1) %}
+          {% set status_map = {
+            0:  'Idle',
+            1:  'Off',
+            2:  'Heating',
+            4:  'Domestic hot water',
+            10: 'Defrost',
+            11: 'Flow monitoring',
+            30: 'Lock'
+          } %}
+          {{ status_map.get(code, 'Unknown status (code %s)' | format(code)) }}
+
+      - name: "Dimplex Lock Text"
+        unique_id: "dimplex_lock_text"
+        icon: mdi:lock-alert
+        state: >
+          {% set code = states('sensor.dimplex_lock_messages') | int(0) %}
+          {% set lock_map = {
+            0:  'No lock',
+            7:  'System check',
+            9:  'Pump pre-run',
+            10: 'Minimum standstill time',
+            11: 'Grid load limitation',
+            12: 'Anti short-cycling lock',
+            15: 'Utility (EVU) lock',
+            17: 'Flow lock',
+            35: 'Fault lock'
+          } %}
+          {{ lock_map.get(code, 'Unknown lock (code %s)' | format(code)) }}
+
+      - name: "Dimplex Fault Text"
+        unique_id: "dimplex_fault_text"
+        icon: mdi:alert-circle
+        state: >
+          {% set code = states('sensor.dimplex_fault_messages') | int(0) %}
+          {% set fault_map = {
+            0:  'No fault',
+            6:  'Electronic expansion valve fault',
+            15: 'Sensor fault',
+            19: 'Primary circuit fault',
+            22: 'DHW fault',
+            23: 'Compressor load fault',
+            24: 'Configuration / coding fault',
+            25: 'Low pressure fault',
+            26: 'Frost protection fault',
+            29: 'Temperature difference fault',
+            31: 'Flow fault'
+          } %}
+          {{ fault_map.get(code, 'Unknown fault (code %s)' | format(code)) }}
+          
+        # ---------- SG Ready mode as text ----------
+      - name: "Dimplex SG Ready Mode Text"
+        unique_id: "dimplex_sg_ready_mode_text"
+        icon: mdi:solar-power
+        state: >
+          {% set code = states('sensor.dimplex_sg_ready_mode') | int(0) %}
+          {% set sg_map = {
+            0:  'Hardware',
+            10: 'Yellow',
+            11: 'Green',
+            12: 'Red',
+            13: 'Deep Green'
+          } %}
+          {{ sg_map.get(code, 'Unknown (code %s)' | format(code)) }}
+          
+      - name: "Dimplex SG Ready State Inputs"
+        unique_id: "dimplex_sg_ready_state_inputs"
+        icon: mdi:solar-power
+        state: >
+          {% set sg1 = 1 if is_state('binary_sensor.dimplex_smartgrid_input_1', 'on') else 0 %}
+          {% set sg2 = 1 if is_state('binary_sensor.dimplex_smartgrid_input_2', 'on') else 0 %}
+          {% if sg1 == 0 and sg2 == 0 %}
+            Yellow
+          {% elif sg1 == 0 and sg2 == 1 %}
+            Red
+          {% elif sg1 == 1 and sg2 == 0 %}
+            Green
+          {% elif sg1 == 1 and sg2 == 1 %}
+            Deep Green
+          {% else %}
+            Unknown
+          {% endif %}
+
+    binary_sensor:
+      - name: "Dimplex Any Lock Active"
+        unique_id: "dimplex_any_lock_active"
+        device_class: problem
+        state: >
+          {{ states('sensor.dimplex_lock_messages') | int(0) != 0 }}
+
+      - name: "Dimplex Any Fault Active"
+        unique_id: "dimplex_any_fault_active"
+        device_class: problem
+        state: >
+          {{ states('sensor.dimplex_fault_messages') | int(0) != 0 }}
+
+input_select:
+  sg_ready_mode:
+    name: SG Ready Mode
+    options:
+      - Hardware
+      - Yellow
+      - Green
+      - Red
+      - Deep Green
+    icon: mdi:solar-power
+
+automation:
+  # --- 1) Zmiana input_select -> zapis do Modbus (5167) ---
+  - alias: "Dimplex SG Ready – write register"
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: input_select.sg_ready_mode
+    action:
+      - variables:
+          map:
+            Hardware: 0
+            Yellow: 10
+            Green: 11
+            Red: 12
+            Deep Green: 13
+          sel: "{{ trigger.to_state.state }}"
+      - service: modbus.write_register
+        data:
+          hub: dimplex_lak9     # nazwa z sekcji modbus: name:
+          unit: 1               # najczęściej 1
+          address: 5167
+          value: "{{ map[sel] }}"
+          
+  # --- 2) Zmiana rejestru -> aktualizacja input_select ---
+  - alias: "Dimplex SG Ready – sync from register"
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: sensor.dimplex_sg_ready_mode
+    action:
+      - variables:
+          code: "{{ trigger.to_state.state | int(0) }}"
+          map:
+            0:  'Hardware'
+            10: 'Yellow'
+            11: 'Green'
+            12: 'Red'
+            13: 'Deep Green'
+      - service: input_select.select_option
+        data:
+          entity_id: input_select.sg_ready_mode
+          option: "{{ map.get(code, 'Hardware') }}"

@@ -1,0 +1,45 @@
+type: sections
+max_columns: 4
+title: History
+path: history
+sections:
+  - type: grid
+    cards:
+      - type: heading
+        heading: New section
+      - title: History
+        type: history-graph
+        hours_to_show: 24
+        entities:
+          - entity: sensor.dimplex_outdoor_temperature
+          - entity: sensor.dimplex_return_temperature
+          - entity: sensor.dimplex_flow_temperature
+          - entity: sensor.dimplex_dhw_temperature
+          - entity: sensor.dimplex_status_text
+          - entity: sensor.dimplex_inverter_frequency
+          - entity: binary_sensor.dimplex_output_2nd_heat_generator
+          - entity: sensor.dimplex_sg_ready_state_inputs
+          - entity: sensor.dimplex_return_setpoint_temperature
+          - entity: binary_sensor.dimplex_output_heating_pump_m13
+          - entity: binary_sensor.dimplex_output_compressor_1
+          - entity: binary_sensor.dimplex_output_additional_circulation_pump
+          - entity: binary_sensor.dimplex_output_dhw_pump
+          - entity: sensor.dimplex_dhw_setpoint_temperature
+          - entity: binary_sensor.dimplex_output_heating_pump_m15
+          - entity: binary_sensor.dimplex_output_heating_pump_m14
+          - entity: sensor.dimplex_status_messages
+          - entity: sensor.lak9_total_power_estimated_kw
+          - entity: sensor.lak9_compressor_power_estimated_kw
+          - entity: sensor.lak9_heater_power_estimated_kw
+          - entity: sensor.lak9_estimated_flow
+          - entity: sensor.lak9_estimated_flow_smoothed
+          - entity: sensor.dimplex_lock_text
+          - entity: sensor.dimplex_fault_text
+          - entity: sensor.dimplex_lock_messages
+          - entity: sensor.dimplex_fault_messages
+          - entity: sensor.aquaro_sensor_82464185810637_water_flow
+        grid_options:
+          columns: full
+          rows: auto
+    column_span: 4
+cards: []
