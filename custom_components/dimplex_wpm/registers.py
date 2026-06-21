@@ -227,25 +227,25 @@ REGISTERS: tuple[RegisterSpec, ...] = (
     _temp("source_outlet_temperature", 7, M_SOURCE, "Source outlet temperature"),
 
     # ===== Passive cooling (optional) =====
-    _temp("cooling_flow_temperature", 19, M_COOLING, "Passive cooling flow temperature", flag=M_COOLING),
-    _temp("cooling_return_temperature", 20, M_COOLING, "Passive cooling return temperature", flag=M_COOLING),
-    _temp("cooling_primary_return_temperature", 21, M_COOLING, "Cooling primary return temperature", flag=M_COOLING),
+    _temp("cooling_flow_temperature", 19, M_COOLING, "Flow temperature", flag=M_COOLING),
+    _temp("cooling_return_temperature", 20, M_COOLING, "Return temperature", flag=M_COOLING),
+    _temp("cooling_primary_return_temperature", 21, M_COOLING, "Primary return temperature", flag=M_COOLING),
 
     # ===== Solar (optional) — collector shares reg 10 with HC3 by config =====
-    _temp("solar_collector_temperature", 10, M_SOLAR, "Solar collector temperature", flag=M_SOLAR, re=False),
-    _temp("solar_tank_temperature", 23, M_SOLAR, "Solar tank temperature", flag=M_SOLAR),
+    _temp("solar_collector_temperature", 10, M_SOLAR, "Collector temperature", flag=M_SOLAR, re=False),
+    _temp("solar_tank_temperature", 23, M_SOLAR, "Tank temperature", flag=M_SOLAR),
 
     # ===== Ventilation (optional) =====
-    _temp("vent_outdoor_air_temperature", 120, M_VENT, "Ventilation outdoor air temperature", flag=M_VENT),
-    _temp("vent_supply_air_temperature", 121, M_VENT, "Ventilation supply air temperature", flag=M_VENT),
-    _temp("vent_extract_air_temperature", 122, M_VENT, "Ventilation extract air temperature", flag=M_VENT),
-    _temp("vent_exhaust_air_temperature", 123, M_VENT, "Ventilation exhaust air temperature", flag=M_VENT),
+    _temp("vent_outdoor_air_temperature", 120, M_VENT, "Outdoor air temperature", flag=M_VENT),
+    _temp("vent_supply_air_temperature", 121, M_VENT, "Supply air temperature", flag=M_VENT),
+    _temp("vent_extract_air_temperature", 122, M_VENT, "Extract air temperature", flag=M_VENT),
+    _temp("vent_exhaust_air_temperature", 123, M_VENT, "Exhaust air temperature", flag=M_VENT),
     RegisterSpec("vent_supply_fan_speed", 125, signed=True, unit="rpm", state_class="measurement",
-                 module=M_VENT, module_flag=M_VENT, name="Ventilation supply fan speed", icon="mdi:fan"),
+                 module=M_VENT, module_flag=M_VENT, name="Supply fan speed", icon="mdi:fan"),
     RegisterSpec("vent_extract_fan_speed", 126, signed=True, unit="rpm", state_class="measurement",
-                 module=M_VENT, module_flag=M_VENT, name="Ventilation extract fan speed", icon="mdi:fan"),
+                 module=M_VENT, module_flag=M_VENT, name="Extract fan speed", icon="mdi:fan"),
     RegisterSpec("vent_level", 5034, state_class="measurement", entity_category="diagnostic",
-                 module=M_VENT, module_flag=M_VENT, name="Ventilation level", icon="mdi:fan-chevron-up"),
+                 module=M_VENT, module_flag=M_VENT, name="Fan level", icon="mdi:fan-chevron-up"),
 
     # ===== Smart Grid (read; control select added in M2) =====
     RegisterSpec("sg_ready_code", 5167, entity_category="diagnostic", module=M_CONTROLLER, name="SG Ready code"),
@@ -258,7 +258,7 @@ REGISTERS: tuple[RegisterSpec, ...] = (
                  capability=CAP_HEAT_METER, name="Heat output power"),
     RegisterSpec("electrical_power", 5170, signed=True, scale=0.01, unit="kW",
                  device_class="power", state_class="measurement", module=M_ENERGY,
-                 capability=CAP_ELECTRIC_METER, name="Electrical power"),
+                 capability=CAP_ELECTRIC_METER, name="Electrical power (meter)"),
     RegisterSpec("pv_surplus", 5182, signed=True, scale=0.01, unit="kW",
                  device_class="power", state_class="measurement", module=M_ENERGY,
                  entity_category="diagnostic", capability=CAP_ELECTRIC_METER,

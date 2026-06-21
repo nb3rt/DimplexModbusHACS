@@ -242,7 +242,7 @@ class DimplexControllerInfo(DimplexEntityMixin, CoordinatorEntity, SensorEntity)
             "unit_id": meta.get("unit_id"),
             "profile": meta.get("profile"),
             "last_update": meta.get("last_update"),
-            "consecutive_failures": meta.get("consecutive_failures"),
+            "last_update_success": self.coordinator.last_update_success,
             "estimation_possible": self.coordinator.estimation_possible,
             "enabled_modules": sorted(self.coordinator.enabled_modules),
             "capabilities": sorted(self.coordinator.capabilities),

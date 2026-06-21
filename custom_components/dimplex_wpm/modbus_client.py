@@ -97,8 +97,8 @@ class DimplexModbusClient:
         """Write a single holding register."""
         address += REGISTER_OFFSET
         async with self._lock:
-            await self._ensure_connected()
             try:
+                await self._ensure_connected()
                 assert self._client is not None
                 result = await self._client.write_register(
                     address, value, **self._unit_kwargs(self._client.write_register)
@@ -106,6 +106,11 @@ class DimplexModbusClient:
             except ModbusException as err:
                 LOGGER.error("Modbus write failed: %s", err)
                 raise
+            except (ConnectionError, OSError) as err:
+                # connect() raises builtin ConnectionError; map to ModbusException
+                # so entity write handlers surface a friendly HomeAssistantError.
+                LOGGER.error("Modbus write connection failed: %s", err)
+                raise ModbusException(f"Connection failed: {err}") from err
             if result.isError():
                 raise ModbusException(f"Write error: {result}")
             LOGGER.debug("Wrote register %s=%s", address, value)

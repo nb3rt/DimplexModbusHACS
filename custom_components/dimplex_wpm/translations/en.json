@@ -66,13 +66,13 @@
         "name": "Controller info"
       },
       "cooling_flow_temperature": {
-        "name": "Passive cooling flow temperature"
+        "name": "Flow temperature"
       },
       "cooling_primary_return_temperature": {
-        "name": "Cooling primary return temperature"
+        "name": "Primary return temperature"
       },
       "cooling_return_temperature": {
-        "name": "Passive cooling return temperature"
+        "name": "Return temperature"
       },
       "cop_estimated": {
         "name": "COP (est.)"
@@ -96,7 +96,7 @@
         "name": "Electrical energy"
       },
       "electrical_power": {
-        "name": "Electrical power"
+        "name": "Electrical power (meter)"
       },
       "electrical_power_best": {
         "name": "Electrical power"
@@ -240,10 +240,10 @@
         "name": "SG Ready state"
       },
       "solar_collector_temperature": {
-        "name": "Solar collector temperature"
+        "name": "Collector temperature"
       },
       "solar_tank_temperature": {
-        "name": "Solar tank temperature"
+        "name": "Tank temperature"
       },
       "source_inlet_temperature": {
         "name": "Source inlet temperature"
@@ -279,25 +279,25 @@
         "name": "Total electrical power (est.)"
       },
       "vent_exhaust_air_temperature": {
-        "name": "Ventilation exhaust air temperature"
+        "name": "Exhaust air temperature"
       },
       "vent_extract_air_temperature": {
-        "name": "Ventilation extract air temperature"
+        "name": "Extract air temperature"
       },
       "vent_extract_fan_speed": {
-        "name": "Ventilation extract fan speed"
+        "name": "Extract fan speed"
       },
       "vent_level": {
-        "name": "Ventilation level"
+        "name": "Fan level"
       },
       "vent_outdoor_air_temperature": {
-        "name": "Ventilation outdoor air temperature"
+        "name": "Outdoor air temperature"
       },
       "vent_supply_air_temperature": {
-        "name": "Ventilation supply air temperature"
+        "name": "Supply air temperature"
       },
       "vent_supply_fan_speed": {
-        "name": "Ventilation supply fan speed"
+        "name": "Supply fan speed"
       }
     },
     "binary_sensor": {

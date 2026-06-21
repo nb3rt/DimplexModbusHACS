@@ -98,11 +98,16 @@ is standard Home Assistant behaviour with `has_entity_name`.
 With a heat meter: `sensor.analytics_heating_energy_meter`, `..._dhw_energy_meter`,
 `..._environmental_energy_meter` (+ `..._pool_energy_meter` with pool module);
 the estimated `..._heat_energy` is then suppressed (no double count).
-With an electric meter: `analytics_electrical_power` source becomes `measured`.
+With an electric meter the raw register sensors also appear:
+`sensor.analytics_electrical_power_meter` (5170) and
+`sensor.analytics_heat_output_power` (5168); the canonical
+`sensor.analytics_electrical_power` / `analytics_heat_output` carry the
+`source` attribute (measured vs estimated).
 
 ## Optional modules (only when enabled)
 - HC2/3: `sensor.heating_circuits_2_3_hc2_temperature`, `..._hc3_temperature`, setpoints…
 - Pool: `sensor.swimming_pool_*` · `number.swimming_pool_pool_setpoint` (control)
 - Ventilation: `sensor.ventilation_supply_air_temperature`, `..._supply_fan_speed`, …
-- Solar: `sensor.solar_solar_collector_temperature`, `..._solar_tank_temperature`
-- Passive cooling: `sensor.passive_cooling_*`
+- Solar: `sensor.solar_collector_temperature`, `sensor.solar_tank_temperature`
+- Passive cooling: `sensor.passive_cooling_flow_temperature`,
+  `..._return_temperature`, `..._primary_return_temperature`

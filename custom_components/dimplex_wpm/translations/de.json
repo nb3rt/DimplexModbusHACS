@@ -96,7 +96,7 @@
         "name": "Elektrische Energie"
       },
       "electrical_power": {
-        "name": "Elektrische Leistung"
+        "name": "Elektrische Leistung (Zähler)"
       },
       "electrical_power_best": {
         "name": "Elektrische Leistung"
@@ -279,25 +279,25 @@
         "name": "Gesamte elektrische Leistung (geschätzt)"
       },
       "vent_exhaust_air_temperature": {
-        "name": "Lüftung Fortlufttemperatur"
+        "name": "Fortlufttemperatur"
       },
       "vent_extract_air_temperature": {
-        "name": "Lüftung Ablufttemperatur"
+        "name": "Ablufttemperatur"
       },
       "vent_extract_fan_speed": {
-        "name": "Lüftung Abluftventilatordrehzahl"
+        "name": "Abluftventilatordrehzahl"
       },
       "vent_level": {
         "name": "Lüftungsstufe"
       },
       "vent_outdoor_air_temperature": {
-        "name": "Lüftung Außenlufttemperatur"
+        "name": "Außenlufttemperatur"
       },
       "vent_supply_air_temperature": {
-        "name": "Lüftung Zulufttemperatur"
+        "name": "Zulufttemperatur"
       },
       "vent_supply_fan_speed": {
-        "name": "Lüftung Zuluftventilatordrehzahl"
+        "name": "Zuluftventilatordrehzahl"
       }
     },
     "binary_sensor": {

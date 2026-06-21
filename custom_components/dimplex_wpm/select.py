@@ -39,7 +39,7 @@ async def async_setup_entry(
         return
 
     host = data.get("host")
-    version = data.get("software_version")
+    version = coordinator.software_version
     model = data.get("model")
 
     entities: list[SelectEntity] = [

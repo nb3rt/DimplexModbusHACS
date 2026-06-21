@@ -96,7 +96,7 @@
         "name": "Energia elektryczna"
       },
       "electrical_power": {
-        "name": "Moc elektryczna"
+        "name": "Moc elektryczna (licznik)"
       },
       "electrical_power_best": {
         "name": "Moc elektryczna"
