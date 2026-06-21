@@ -70,6 +70,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     include_re = source.get(
         CONF_INCLUDE_RE_REGISTERS, CAP_INVERTER_FREQ in capabilities
     )
+    enable_control = entry.options.get(CONF_ENABLE_WRITE_ENTITIES, DEFAULT_ENABLE_WRITE)
 
     client = DimplexModbusClient(host, port, unit_id, timeout)
     coordinator = DimplexDataUpdateCoordinator(
@@ -82,6 +83,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         include_re=include_re,
         profile=profile,
         flow_sensor_entity=source.get(CONF_FLOW_SENSOR_ENTITY) or None,
+        enable_control=enable_control,
         host=host,
         port=port,
         unit_id=unit_id,

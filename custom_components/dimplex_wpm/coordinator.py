@@ -24,6 +24,7 @@ from .registers import (
     HOLDING,
     active_energy_groups,
     active_registers,
+    active_write_registers,
     build_read_plan,
     decode_value,
     energy_total_kwh,
@@ -47,6 +48,7 @@ class DimplexDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         include_re: bool,
         profile: DeviceProfile,
         flow_sensor_entity: str | None = None,
+        enable_control: bool = False,
         host: str | None = None,
         port: int | None = None,
         unit_id: int | None = None,
@@ -93,7 +95,14 @@ class DimplexDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.energy_groups = active_energy_groups(
             enabled_modules=enabled_modules, capabilities=capabilities
         )
-        self._plan = build_read_plan(self.specs, self.energy_groups, software_version)
+        self.enable_control = enable_control
+        self.write_specs = (
+            active_write_registers(enabled_modules=enabled_modules) if enable_control else []
+        )
+        extra_holding = {ws.address for ws in self.write_specs}
+        self._plan = build_read_plan(
+            self.specs, self.energy_groups, software_version, extra_holding
+        )
 
         self._connection_info = {
             "host": host,
@@ -135,6 +144,11 @@ class DimplexDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             regs = [holding.get(r) for r in group.registers]
             if all(r is not None for r in regs):
                 values[group.key] = energy_total_kwh(*regs)  # type: ignore[arg-type]
+
+        # Writable controls: decode current value (number=display, select=raw code).
+        for ws in self.write_specs:
+            if ws.address in holding:
+                values[ws.key] = ws.from_raw(holding[ws.address])
 
         # Derived problem flags from the raw codes.
         if "fault_code" in values:

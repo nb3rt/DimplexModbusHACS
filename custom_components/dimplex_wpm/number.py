@@ -8,17 +8,27 @@ across restarts.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
-from homeassistant.components.number import NumberMode, RestoreNumber
+from homeassistant.components.number import (
+    NumberDeviceClass,
+    NumberEntity,
+    NumberMode,
+    RestoreNumber,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory, UnitOfPower
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from pymodbus.exceptions import ModbusException
 
-from .const import DOMAIN
+from .const import CONF_ENABLE_WRITE_ENTITIES, DEFAULT_ENABLE_WRITE, DOMAIN
 from .entity import DimplexEntityMixin
-from .registers import M_ENERGY
+from .registers import KIND_NUMBER, M_ENERGY, WriteSpec
+
+NUMBER_DEVICE_CLASS_MAP = {"temperature": NumberDeviceClass.TEMPERATURE}
 
 
 @dataclass(frozen=True)
@@ -54,16 +64,28 @@ async def async_setup_entry(
     """Create calibration numbers (only when estimation is active)."""
     data = hass.data[DOMAIN][entry.entry_id]
     coordinator = data["coordinator"]
-    if not coordinator.estimation_possible:
-        return
-
     host = data.get("host")
     version = coordinator.software_version
     model = data.get("model")
-    async_add_entities(
-        DimplexCalibrationNumber(coordinator, entry, spec, host=host, version=version, model=model)
-        for spec in CALIBRATION
-    )
+
+    entities: list[NumberEntity] = []
+
+    # Calibration numbers (always, when estimation runs; write to HA not the pump).
+    if coordinator.estimation_possible:
+        entities.extend(
+            DimplexCalibrationNumber(coordinator, entry, spec, host=host, version=version, model=model)
+            for spec in CALIBRATION
+        )
+
+    # Writable setpoints (gated by enable_control; write to the heat pump).
+    if data.get(CONF_ENABLE_WRITE_ENTITIES, DEFAULT_ENABLE_WRITE):
+        entities.extend(
+            DimplexWritableNumber(coordinator, entry, ws, host=host, version=version, model=model)
+            for ws in coordinator.write_specs
+            if ws.kind == KIND_NUMBER
+        )
+
+    async_add_entities(entities)
 
 
 class DimplexCalibrationNumber(DimplexEntityMixin, CoordinatorEntity, RestoreNumber):
@@ -104,4 +126,41 @@ class DimplexCalibrationNumber(DimplexEntityMixin, CoordinatorEntity, RestoreNum
         self._attr_native_value = value
         self.coordinator.tunables[self._spec.tunable] = value
         self.async_write_ha_state()
+        await self.coordinator.async_request_refresh()
+
+
+class DimplexWritableNumber(DimplexEntityMixin, CoordinatorEntity, NumberEntity):
+    """A setpoint that writes a holding register on the heat pump (gated)."""
+
+    _attr_mode = NumberMode.BOX
+
+    def __init__(self, coordinator, entry, ws: WriteSpec, *, host, version, model) -> None:
+        CoordinatorEntity.__init__(self, coordinator)
+        self._ws = ws
+        self._apply_common(
+            entry, key=ws.key, module=ws.module, name=ws.name,
+            host=host, software_version=version, model=model,
+        )
+        self._attr_native_min_value = ws.min_value
+        self._attr_native_max_value = ws.max_value
+        self._attr_native_step = ws.step
+        if ws.unit:
+            self._attr_native_unit_of_measurement = ws.unit
+        if ws.device_class:
+            self._attr_device_class = NUMBER_DEVICE_CLASS_MAP.get(ws.device_class)
+        if ws.icon:
+            self._attr_icon = ws.icon
+
+    @property
+    def native_value(self) -> Any:
+        return (self.coordinator.data or {}).get("values", {}).get(self._ws.key)
+
+    async def async_set_native_value(self, value: float) -> None:
+        raw = self._ws.to_raw(value)
+        try:
+            await self.coordinator.write_register(self._ws.address, raw)
+        except ModbusException as err:
+            raise HomeAssistantError(
+                f"Failed to write {self._ws.name}: {err}"
+            ) from err
         await self.coordinator.async_request_refresh()

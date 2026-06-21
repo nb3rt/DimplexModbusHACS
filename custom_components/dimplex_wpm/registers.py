@@ -382,13 +382,16 @@ def build_read_plan(
     specs: list[RegisterSpec],
     energy_groups: list[EnergyGroup],
     version: str,
+    extra_holding: set[int] | None = None,
 ) -> list[tuple[str, int, int]]:
     """Cluster the needed addresses into ``(obj, start, count)`` read chunks.
 
     Addresses are grouped per object type, sorted, then split on gaps larger
     than :data:`CLUSTER_GAP` and capped at :data:`MAX_READ_CHUNK`.
+    ``extra_holding`` adds writable-control addresses so their current values
+    are read back.
     """
-    holding: set[int] = set()
+    holding: set[int] = set(extra_holding or ())
     coils: set[int] = set()
     for s in specs:
         addr = s.resolve_address(version)
@@ -436,3 +439,99 @@ def decode_value(spec: RegisterSpec, raw: int) -> float | int:
 def energy_total_kwh(reg_1_4: int, reg_5_8: int, reg_9_12: int) -> int:
     """Combine the three digit-group registers into total kWh."""
     return reg_9_12 * 100_000_000 + reg_5_8 * 10_000 + reg_1_4
+
+
+# ==========================================================================
+# Writable controls (M2) — behind the enable_control gate.
+#
+# NOTE: exact raw encoding of setpoint registers is not fully confirmed without
+# a real device. Direct registers are assumed integer in their unit; enum-coded
+# registers use the documented offset mappings below. All writes are range
+# clamped. Verify against hardware before trusting writes.
+# ==========================================================================
+
+KIND_NUMBER = "number"
+KIND_SELECT = "select"
+
+# Enum-coded register encoders: (encode display->raw, decode raw->display).
+_ENCODERS = {
+    # 5036/5086 Parallelverschiebung: raw 0..38 ↔ −19..+19 K  (K = raw − 19)
+    "offset19": (lambda v: int(round(v)) + 19, lambda r: r - 19),
+    # 5089 cooling room setpoint: raw 0..30 ↔ 15.0..30.0 °C (°C = 15 + 0.5·raw)
+    "cool_setpoint": (lambda v: int(round((v - 15.0) / 0.5)), lambda r: round(15.0 + r * 0.5, 1)),
+}
+
+
+@dataclass(frozen=True)
+class WriteSpec:
+    """A writable control (number or select) backed by a holding register."""
+
+    key: str
+    address: int
+    name: str
+    module: str
+    kind: str = KIND_NUMBER
+    # number:
+    min_value: float = 0.0
+    max_value: float = 0.0
+    step: float = 1.0
+    unit: str | None = None
+    device_class: str | None = None
+    encode: str | None = None  # None => raw int == display; else key into _ENCODERS
+    # select:
+    options_map: dict[int, str] | None = None
+    # gating:
+    module_flag: str | None = None
+    icon: str | None = None
+
+    def to_raw(self, display: float) -> int:
+        """Clamp the display value to range and encode it to a raw register value."""
+        clamped = min(self.max_value, max(self.min_value, display))
+        if self.encode:
+            return _ENCODERS[self.encode][0](clamped)
+        return int(round(clamped))
+
+    def from_raw(self, raw: int) -> float | int:
+        """Decode a raw register value to the display value."""
+        if self.encode:
+            return _ENCODERS[self.encode][1](raw)
+        return raw
+
+
+WRITE_REGISTERS: tuple[WriteSpec, ...] = (
+    # DHW
+    WriteSpec("set_dhw_setpoint", 5047, "DHW setpoint", M_DHW, min_value=10, max_value=85,
+              unit="°C", device_class="temperature", icon="mdi:water-thermometer"),
+    WriteSpec("set_dhw_setpoint_min", 5145, "DHW setpoint minimum", M_DHW, min_value=10, max_value=85,
+              unit="°C", device_class="temperature"),
+    WriteSpec("set_dhw_setpoint_max", 5048, "DHW setpoint maximum", M_DHW, min_value=10, max_value=85,
+              unit="°C", device_class="temperature"),
+    # HC1
+    WriteSpec("set_hc1_room_setpoint", 46, "HC1 room setpoint", M_HC1, min_value=15, max_value=30,
+              step=0.5, unit="°C", device_class="temperature", icon="mdi:home-thermometer"),
+    WriteSpec("set_hc1_fixed_flow", 5037, "HC1 fixed flow setpoint", M_HC1, min_value=18, max_value=60,
+              unit="°C", device_class="temperature"),
+    WriteSpec("set_hc1_curve_end", 5038, "HC1 heating curve end", M_HC1, min_value=20, max_value=70,
+              unit="°C", device_class="temperature"),
+    WriteSpec("set_hc1_curve_offset", 5036, "HC1 curve offset", M_HC1, min_value=-19, max_value=19,
+              step=1, unit="K", encode="offset19", icon="mdi:tune-variant"),
+    # Pool (optional)
+    WriteSpec("set_pool_setpoint", 5051, "Pool setpoint", M_POOL, min_value=5, max_value=60,
+              unit="°C", device_class="temperature", module_flag=M_POOL, icon="mdi:pool-thermometer"),
+    # Operating mode (select)
+    WriteSpec("set_operating_mode", 5015, "Operating mode", M_CONTROLLER, kind=KIND_SELECT,
+              options_map={0: "Summer", 1: "Winter", 2: "Holiday", 3: "Party",
+                           4: "2nd heat generator", 5: "Cooling"}, icon="mdi:tune"),
+)
+
+
+def active_write_registers(
+    *, enabled_modules: frozenset[str], include_all_modules: bool = False
+) -> list[WriteSpec]:
+    """Return writable controls active for the enabled modules."""
+    out = []
+    for ws in WRITE_REGISTERS:
+        if ws.module_flag and not include_all_modules and ws.module_flag not in enabled_modules:
+            continue
+        out.append(ws)
+    return out

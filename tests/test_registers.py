@@ -114,6 +114,44 @@ def test_no_duplicate_keys():
     assert len(keys) == len(set(keys)), "duplicate register keys"
     gkeys = [g.key for g in reg.ENERGY_GROUPS]
     assert len(gkeys) == len(set(gkeys))
+    wkeys = [w.key for w in reg.WRITE_REGISTERS]
+    assert len(wkeys) == len(set(wkeys)), "duplicate write keys"
+
+
+def test_write_direct_encode_clamp():
+    dhw = next(w for w in reg.WRITE_REGISTERS if w.key == "set_dhw_setpoint")
+    assert dhw.to_raw(50) == 50
+    assert dhw.from_raw(50) == 50
+    assert dhw.to_raw(200) == 85   # clamp to max
+    assert dhw.to_raw(-5) == 10    # clamp to min
+
+
+def test_write_offset19_encode():
+    off = next(w for w in reg.WRITE_REGISTERS if w.key == "set_hc1_curve_offset")
+    assert off.to_raw(0) == 19
+    assert off.to_raw(-19) == 0
+    assert off.to_raw(19) == 38
+    assert off.to_raw(100) == 38   # clamp then encode
+    assert off.from_raw(19) == 0
+    assert off.from_raw(38) == 19
+
+
+def test_write_cool_setpoint_encoder():
+    ws = reg.WriteSpec("x", 5089, "cool", reg.M_HC2_3, min_value=15, max_value=30,
+                       encode="cool_setpoint")
+    assert ws.to_raw(15) == 0
+    assert ws.to_raw(30) == 30
+    assert ws.to_raw(22.5) == 15
+    assert ws.from_raw(30) == 30.0
+    assert ws.from_raw(0) == 15.0
+
+
+def test_active_write_registers_module_gate():
+    no_pool = reg.active_write_registers(enabled_modules=frozenset({"controller", "hc1", "dhw"}))
+    assert "set_pool_setpoint" not in {w.key for w in no_pool}
+    with_pool = reg.active_write_registers(enabled_modules=frozenset({"controller", "pool"}))
+    assert "set_pool_setpoint" in {w.key for w in with_pool}
+    assert "set_dhw_setpoint" in {w.key for w in no_pool}  # ungated always present
 
 
 def _run():
