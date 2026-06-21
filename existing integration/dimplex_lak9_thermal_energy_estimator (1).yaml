@@ -1,0 +1,330 @@
+#############################################
+# DIMPLEX LAK9 — KOMPLETNY MODEL ENERGII CIEPLNEJ (HA)
+# - COP (EN14511) interpolacja 2D na A/W
+# - Q_comp_th: ciepło ze sprężarki (tylko CO/DHW)
+# - Q_heater_th: ciepło z grzałek (1:1, zawsze gdy grzałka on)
+# - Q_defrost_loss_th: strata cieplna defrostu (pobór ciepła z instalacji)
+# - Q_loop_th = Q_comp_th + Q_heater_th - Q_defrost_loss_th
+# - α split: dom vs instalacja (heurystyka na bazie d(ΔT)/dt)
+# - Integracje: kWh_th (dom, instalacja) + defrost loss opcjonalnie
+#
+# WYMAGANE ENCJE WEJŚCIOWE (podmień jeśli masz inne):
+# - sensor.dimplex_outdoor_temp              (°C)  [u Ciebie działa]
+# - sensor.dimplex_flow_temp                 (°C)  [u Ciebie działa]
+# - sensor.dimplex_flow_temperature          (°C)  (do ΔT)
+# - sensor.dimplex_return_temperature        (°C)  (do ΔT)
+# - sensor.dimplex_status_messages           (INT) (2=CO,4=DHW,10=defrost,...)
+# - sensor.lak9_compressor_power_status_code (W)   (z estymatora elektryki)
+# - sensor.lak9_2nd_source_heater_power      (W)   (z estymatora elektryki)
+#############################################
+
+############################
+# 1) PARAMETRY EDYTOWALNE
+############################
+input_number:
+  lak9_defrost_heat_factor:
+    name: "LAK9 defrost heat factor (k_loss)"
+    min: 0.2
+    max: 4.0
+    step: 0.05
+    initial: 2.35
+
+  lak9_alpha_base:
+    name: "LAK9 alpha base"
+    min: 0.0
+    max: 1.0
+    step: 0.01
+    initial: 0.85
+
+  lak9_alpha_sensitivity:
+    name: "LAK9 alpha sensitivity"
+    min: 0.0
+    max: 2.0
+    step: 0.05
+    initial: 0.4
+
+  lak9_alpha_deadband:
+    name: "LAK9 alpha deadband"
+    min: 0.0
+    max: 0.2
+    step: 0.01
+    initial: 0.03
+
+input_boolean:
+  lak9_enable_house_split:
+    name: "LAK9 enable house/installation split"
+    initial: true
+
+
+############################
+# 2) TEMPLATE SENSORS (JEDEN BLOK)
+############################
+template:
+  - sensor:
+
+      #########################################################
+      # 2.1 COP EN14511 (A/W) — interpolacja 2D
+      #########################################################
+      - name: "LAK9 COP EN14511"
+        unique_id: lak9_cop_en14511
+        unit_of_measurement: "COP"
+        state_class: measurement
+        state: >
+          {% set out_raw  = states('sensor.dimplex_outdoor_temperature') %}
+          {% set flow_raw = states('sensor.dimplex_flow_temperature') %}
+
+          {% if out_raw in ['unknown','unavailable',''] or flow_raw in ['unknown','unavailable',''] %}
+            0
+          {% else %}
+            {% set t_out  = out_raw  | replace('°C','') | replace(',','.') | trim | float(none) %}
+            {% set t_flow = flow_raw | replace('°C','') | replace(',','.') | trim | float(none) %}
+            {% if t_out is none or t_flow is none %}
+              0
+            {% else %}
+              {% set A = t_out %}
+              {% if A < -7 %}{% set A = -7 %}{% endif %}
+              {% if A > 10 %}{% set A = 10 %}{% endif %}
+
+              {% set W = t_flow %}
+              {% if W < 35 %}{% set W = 35 %}{% endif %}
+              {% if W > 55 %}{% set W = 55 %}{% endif %}
+
+              {% set A_pts = [-7, 2, 7, 10] %}
+              {% set W_pts = [35, 45, 55] %}
+
+              {% set COP = {
+                -7:{35:2.4, 45:2.24, 55:1.72},
+                 2:{35:3.6, 45:2.96, 55:2.44},
+                 7:{35:4.8, 45:3.30, 55:2.86},
+                10:{35:5.1, 45:3.57, 55:2.98}
+              } %}
+
+              {% set A0 = (A_pts | select('le', A) | list | max) %}
+              {% set A1 = (A_pts | select('ge', A) | list | min) %}
+              {% set W0 = (W_pts | select('le', W) | list | max) %}
+              {% set W1 = (W_pts | select('ge', W) | list | min) %}
+
+              {% set Q11 = COP[A0][W0] %}
+              {% set Q21 = COP[A1][W0] %}
+              {% set Q12 = COP[A0][W1] %}
+              {% set Q22 = COP[A1][W1] %}
+
+              {% if A0 == A1 and W0 == W1 %}
+                {{ Q11 | round(3) }}
+              {% elif A0 == A1 %}
+                {{ (Q11 + (Q12 - Q11) * ((W - W0) / (W1 - W0))) | round(3) }}
+              {% elif W0 == W1 %}
+                {{ (Q11 + (Q21 - Q11) * ((A - A0) / (A1 - A0))) | round(3) }}
+              {% else %}
+                {{ (
+                  Q11 * (A1 - A) * (W1 - W) +
+                  Q21 * (A - A0) * (W1 - W) +
+                  Q12 * (A1 - A) * (W - W0) +
+                  Q22 * (A - A0) * (W - W0)
+                ) / ((A1 - A0) * (W1 - W0)) | round(3) }}
+              {% endif %}
+            {% endif %}
+          {% endif %}
+
+      #########################################################
+      # 2.2 Ciepło z grzałek (1:1)
+      #########################################################
+      - name: "LAK9 Thermal Power Heater"
+        unique_id: lak9_thermal_power_heater
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: >
+          {{ states('sensor.lak9_heater_power_estimated') | float(0) | round(0) }}
+
+      #########################################################
+      # 2.3 Ciepło ze sprężarki (tylko CO/DHW): Q = P_el * COP
+      #########################################################
+      - name: "LAK9 Thermal Power Compressor"
+        unique_id: lak9_thermal_power_compressor
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: >
+          {% set sc = states('sensor.dimplex_status_messages') | int(-1) %}
+          {% set p = states('sensor.lak9_compressor_power_estimated') | float(0) %}
+          {% set cop = states('sensor.lak9_cop_en14511') | float(0) %}
+          {% if sc in [2, 4] %}
+            {{ (p * cop) | round(0) }}
+          {% else %}
+            0
+          {% endif %}
+
+      #########################################################
+      # 2.4 Strata defrostu (pobór ciepła z instalacji)
+      #########################################################
+      - name: "LAK9 Thermal Power Defrost Loss"
+        unique_id: lak9_thermal_power_defrost_loss
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: >
+          {% set sc = states('sensor.dimplex_status_messages') | int(-1) %}
+          {% set p = states('sensor.lak9_compressor_power_estimated') | float(0) %}
+          {% set k = states('input_number.lak9_defrost_heat_factor') | float(1.0) %}
+          {% if sc == 10 %}
+            {{ (p * k) | round(0) }}
+          {% else %}
+            0
+          {% endif %}
+
+      #########################################################
+      # 2.5 Q_loop — netto ciepło “w obiegu” (do domu + instalacji)
+      #########################################################
+      - name: "LAK9 Thermal Power Loop"
+        unique_id: lak9_thermal_power_loop
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: >
+          {% set q_comp = states('sensor.lak9_thermal_power_compressor') | float(0) %}
+          {% set q_heat = states('sensor.lak9_thermal_power_heater') | float(0) %}
+          {% set q_def  = states('sensor.lak9_thermal_power_defrost_loss') | float(0) %}
+          {{ (q_comp + q_heat - q_def) | round(0) }}
+
+      #########################################################
+      # 2.6 ΔT (flow - return) — heurystyka
+      #########################################################
+      - name: "LAK9 DeltaT"
+        unique_id: lak9_deltat
+        unit_of_measurement: "K"
+        state_class: measurement
+        state: >
+          {{ (states('sensor.dimplex_flow_temperature') | float(0) -
+              states('sensor.dimplex_return_temperature') | float(0)) | round(3) }}
+
+      #########################################################
+      # 2.7 α — udział energii oddanej do domu
+      #########################################################
+      - name: "LAK9 Alpha House"
+        unique_id: lak9_alpha_house
+        state: >
+          {% if is_state('input_boolean.lak9_enable_house_split', 'off') %}
+            1
+          {% else %}
+            {% set a0 = states('input_number.lak9_alpha_base') | float(0.85) %}
+            {% set s  = states('input_number.lak9_alpha_sensitivity') | float(0.4) %}
+            {% set db = states('input_number.lak9_alpha_deadband') | float(0.03) %}
+            {% set d  = states('sensor.lak9_ddeltat_dt') | float(0) %}
+
+            {% if d < db and d > -db %}{% set d = 0 %}{% endif %}
+            {% set a = a0 - s * d %}
+            {% if a < 0 %}0{% elif a > 1 %}1{% else %}{{ a | round(3) }}{% endif %}
+          {% endif %}
+
+      #########################################################
+      # 2.8 Rozdział: DOM / INSTALACJA
+      #########################################################
+      - name: "LAK9 Thermal Power To House"
+        unique_id: lak9_thermal_power_to_house
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: >
+          {{ (states('sensor.lak9_thermal_power_loop') | float(0) *
+              states('sensor.lak9_alpha_house') | float(1)) | round(0) }}
+
+      - name: "LAK9 Thermal Power To Installation"
+        unique_id: lak9_thermal_power_to_installation
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: >
+          {{ (states('sensor.lak9_thermal_power_loop') | float(0) -
+              states('sensor.lak9_thermal_power_to_house') | float(0)) | round(0) }}
+
+      #########################################################
+      # (DODATEK) Przepływ estymowany z bilansu: Q = m*cp*ΔT
+      # V̇[m³/h] ≈ Q[W] / (4180 * ΔT[K]) * 3.6
+      # Ograniczenia:
+      # - tylko CO/DHW
+      # - ΔT > 0.5 K
+      # - clamp 0..3.8 m³/h
+      #########################################################
+      - name: "LAK9 Estimated Flow"
+        unique_id: lak9_estimated_flow_m3h
+        unit_of_measurement: "m³/h"
+        state_class: measurement
+        icon: mdi:water-pump
+        state: >
+          {% set sc = states('sensor.dimplex_status_messages') | int(-1) %}
+          {% set q = states('sensor.lak9_thermal_power_compressor') | float(0) %}   {# W #}
+          {% set dt = states('sensor.lak9_deltat') | float(0) %}             {# K #}
+
+          {% if sc in [2,4] and q > 0 and dt > 0.5 %}
+            {% set v_m3h = (q / (4180 * dt)) * 3.6 %}
+            {% if v_m3h < 0 %} 0
+            {% elif v_m3h > 3.8 %} 3.8
+            {% else %} {{ v_m3h | round(2) }}
+            {% endif %}
+          {% else %}
+            0
+          {% endif %}
+
+      #########################################################
+      # (DODATEK) Przepływ wygładzony (EMA)
+      # - stabilniejszy wykres i stabilniejsze liczenie Q_hyd
+      #########################################################
+      - name: "LAK9 Estimated Flow (smoothed)"
+        unique_id: lak9_estimated_flow_m3h_smoothed
+        unit_of_measurement: "m³/h"
+        state_class: measurement
+        icon: mdi:water
+        state: >
+          {{ states('sensor.lak9_estimated_flow') | float(0) | round(2) }}
+
+############################
+# 3) POCHODNE I INTEGRACJE
+############################
+sensor:
+  - platform: derivative
+    name: "LAK9 dDeltaT/dt"
+    unique_id: lak9_ddeltat_dt
+    source: sensor.lak9_deltat
+    unit_time: min
+    time_window: "00:05:00"
+
+  - platform: integration
+    name: "LAK9 Thermal Energy To House (kWh_th)"
+    unique_id: lak9_thermal_energy_to_house_kwh_th
+    source: sensor.lak9_thermal_power_to_house
+    unit_prefix: k
+    method: trapezoidal
+
+  - platform: integration
+    name: "LAK9 Installation Energy (kWh_th)"
+    unique_id: lak9_installation_energy_kwh_th
+    source: sensor.lak9_thermal_power_to_installation
+    unit_prefix: k
+    method: trapezoidal
+
+  # Opcjonalnie: ile “zjadł” defrost (kWh_th) z domu
+  - platform: integration
+    name: "LAK9 Defrost Heat Loss (kWh_th)"
+    unique_id: lak9_defrost_heat_loss_kwh_th
+    source: sensor.lak9_thermal_power_defrost_loss
+    unit_prefix: k
+    method: trapezoidal
+    
+  - platform: statistics
+    name: "LAK9 Flow Mean 10m"
+    unique_id: lak9_flow_mean_10m
+    entity_id: sensor.lak9_estimated_flow_m3h
+    state_characteristic: mean
+    max_age:
+      minutes: 10
+    sampling_size: 500
+
+  - platform: statistics
+    name: "LAK9 Flow Mean 20m"
+    unique_id: lak9_flow_mean_20m
+    entity_id: sensor.lak9_estimated_flow_m3h
+    state_characteristic: mean
+    max_age:
+      minutes: 20
+    sampling_size: 1000

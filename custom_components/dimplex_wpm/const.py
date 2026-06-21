@@ -4,6 +4,31 @@ from __future__ import annotations
 
 from typing import Final
 
+from .registers import (
+    CAP_ELECTRIC_METER,
+    CAP_FLOW_SENSOR,
+    CAP_HEAT_METER,
+    CAP_INVERTER_FREQ,
+    CORE_MODULES,
+    ENUM_FAULT,
+    ENUM_LOCK,
+    ENUM_OPERATING_MODE,
+    ENUM_SENSOR_ERROR,
+    ENUM_SG_READY,
+    ENUM_STATUS,
+    M_CONTROLLER,
+    M_COOLING,
+    M_DHW,
+    M_ENERGY,
+    M_HC1,
+    M_HC2_3,
+    M_POOL,
+    M_SOLAR,
+    M_SOURCE,
+    M_VENT,
+    OPTIONAL_MODULES,
+)
+
 DOMAIN: Final = "dimplex_wpm"
 
 DEFAULT_PORT: Final = 502
@@ -11,7 +36,9 @@ DEFAULT_UNIT_ID: Final = 1
 DEFAULT_SCAN_INTERVAL: Final = 30
 DEFAULT_TIMEOUT: Final = 5
 DEFAULT_ENABLE_WRITE: Final = False
-DEFAULT_SOFTWARE_VERSION: Final = "H"
+# Target firmware is L/M (modern). Status/lock/fault addresses + value maps differ
+# per version; see registers.py and spec/REGISTERS.md.
+DEFAULT_SOFTWARE_VERSION: Final = "M"
 
 # Dimplex documentation uses 1-based register numbers and the device expects 1-based addresses.
 REGISTER_OFFSET: Final = 0
@@ -22,21 +49,8 @@ CONF_UNIT_ID: Final = "unit_id"
 CONF_SCAN_INTERVAL: Final = "scan_interval"
 CONF_TIMEOUT: Final = "timeout"
 CONF_SOFTWARE_VERSION: Final = "software_version"
-CONF_REGISTER_STRATEGY: Final = "register_strategy"
+# Master gate for control/write entities (M2). Calibration numbers are NOT gated.
 CONF_ENABLE_WRITE_ENTITIES: Final = "enable_write_entities"
-CONF_ENABLE_EMS: Final = "enable_ems_entities"
-CONF_ENABLE_BMS_TEMP: Final = "enable_bms_temp"
-CONF_ENABLE_EXTERNAL_LOCK: Final = "enable_external_lock"
-
-REGISTER_STRATEGY_AUTO: Final = "auto"
-REGISTER_STRATEGY_HOLDING: Final = "holding"
-REGISTER_STRATEGY_INPUT: Final = "input"
-
-REGISTER_STRATEGY_MAP: Final = {
-    REGISTER_STRATEGY_AUTO: REGISTER_STRATEGY_AUTO,
-    REGISTER_STRATEGY_HOLDING: REGISTER_STRATEGY_HOLDING,
-    REGISTER_STRATEGY_INPUT: REGISTER_STRATEGY_INPUT,
-}
 
 SOFTWARE_VERSIONS: Final = ["H", "J", "L", "M"]
 
@@ -382,17 +396,87 @@ SENSOR_ERROR_MAP_BY_VERSION: Final = {
     "M": SENSOR_ERROR_MAP_LM,
 }
 
+OPERATING_MODE_MAP: Final = {
+    0: "Summer",
+    1: "Winter",
+    2: "Holiday",
+    3: "Party",
+    4: "2nd heat generator",
+    5: "Cooling",
+}
+
+
+def get_enum_map(enum_key: str, software_version: str) -> dict[int, str]:
+    """Resolve an enum key + firmware version to the right value→text map."""
+    if enum_key == ENUM_STATUS:
+        return STATUS_MAP_BY_VERSION.get(software_version, STATUS_MAP_LM)
+    if enum_key == ENUM_LOCK:
+        return LOCK_MAP_BY_VERSION.get(software_version, LOCK_MAP_LM)
+    if enum_key == ENUM_FAULT:
+        return FAULT_MAP_BY_VERSION.get(software_version, FAULT_MAP_LM)
+    if enum_key == ENUM_SENSOR_ERROR:
+        return SENSOR_ERROR_MAP_BY_VERSION.get(software_version, SENSOR_ERROR_MAP_LM)
+    if enum_key == ENUM_SG_READY:
+        return SG_READY_MAP
+    if enum_key == ENUM_OPERATING_MODE:
+        return OPERATING_MODE_MAP
+    return {}
+
+
 DEVICE_MANUFACTURER: Final = "Dimplex"
 DEVICE_NAME: Final = "Dimplex WPM"
 
-MODULE_ROOT: Final = "controller"
-MODULE_HC1: Final = "hc1"
-MODULE_DHW: Final = "dhw"
-MODULE_SG: Final = "sg"
+# Device-tree module keys come from registers.py (single source of truth).
+MODULE_ROOT: Final = M_CONTROLLER
 
 MODULE_NAME_MAP: Final = {
-    MODULE_ROOT: "Dimplex WPM Controller",
-    MODULE_HC1: "Dimplex Heating Circuit 1",
-    MODULE_DHW: "Dimplex Domestic Hot Water",
-    MODULE_SG: "Dimplex Smart Grid",
+    M_CONTROLLER: "Controller",
+    M_HC1: "Heating circuit 1",
+    M_HC2_3: "Heating circuits 2/3",
+    M_DHW: "Domestic hot water",
+    M_POOL: "Swimming pool",
+    M_VENT: "Ventilation",
+    M_SOLAR: "Solar",
+    M_SOURCE: "Heat source",
+    M_COOLING: "Passive cooling",
+    M_ENERGY: "Analytics",
 }
+
+# ----- profile / modules / capabilities (config entry) --------------------
+CONF_PROFILE: Final = "profile"
+DEFAULT_PROFILE: Final = "lak9"
+
+CONF_ENABLED_MODULES: Final = "enabled_modules"
+
+CONF_HAS_ELECTRIC_METER: Final = "has_electric_meter"
+CONF_HAS_HEAT_METER: Final = "has_heat_meter"
+CONF_HAS_FLOW_SENSOR: Final = "has_flow_sensor"
+CONF_FLOW_SENSOR_ENTITY: Final = "flow_sensor_entity"
+CONF_HAS_INVERTER_FREQ: Final = "has_inverter_freq"
+CONF_INCLUDE_RE_REGISTERS: Final = "include_re_registers"
+
+# Map config keys → capability tokens used by registers.py.
+CAPABILITY_CONF_MAP: Final = {
+    CONF_HAS_ELECTRIC_METER: CAP_ELECTRIC_METER,
+    CONF_HAS_HEAT_METER: CAP_HEAT_METER,
+    CONF_HAS_FLOW_SENSOR: CAP_FLOW_SENSOR,
+    CONF_HAS_INVERTER_FREQ: CAP_INVERTER_FREQ,
+}
+
+# Optional modules a user can toggle (core modules are always on).
+SELECTABLE_MODULES: Final = list(OPTIONAL_MODULES)
+
+
+def resolve_capabilities(source: dict) -> frozenset[str]:
+    """Build the capability token set from a config/options dict."""
+    return frozenset(
+        token
+        for conf_key, token in CAPABILITY_CONF_MAP.items()
+        if source.get(conf_key)
+    )
+
+
+def resolve_enabled_modules(source: dict) -> frozenset[str]:
+    """Core modules + the user-selected optional modules."""
+    selected = set(source.get(CONF_ENABLED_MODULES) or [])
+    return frozenset(CORE_MODULES | (selected & set(SELECTABLE_MODULES)))

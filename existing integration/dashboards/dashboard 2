@@ -1,0 +1,33 @@
+type: sections
+max_columns: 4
+title: Energy
+path: energy
+sections:
+  - type: grid
+    cards:
+      - type: history-graph
+        entities:
+          - entity: sensor.lak9_thermal_power_loop
+          - entity: sensor.lak9_compressor_power_estimated
+          - entity: sensor.lak9_thermal_power_compressor
+          - entity: sensor.lak9_thermal_power_heater
+          - entity: sensor.lak9_thermal_power_defrost_loss
+          - entity: sensor.lak9_thermal_power_loop
+        title: Heat production 6h
+        hours_to_show: 6
+        grid_options:
+          columns: full
+      - type: history-graph
+        entities:
+          - entity: sensor.lak9_cop_en14511
+          - entity: sensor.lak9_deltat
+          - entity: sensor.lak9_estimated_flow
+          - entity: sensor.lak9_estimated_flow_smoothed
+          - entity: sensor.aquaro_sensor_82464185810637_water_flow
+        grid_options:
+          columns: full
+        hours_to_show: 6
+      - type: heading
+        heading: New section
+    column_span: 4
+cards: []

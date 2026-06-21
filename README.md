@@ -1,79 +1,108 @@
-# Dimplex WPM – Home Assistant Modbus TCP integration
+# Dimplex WPM — Home Assistant (Modbus TCP)
 
-Custom HACS integration for connecting Dimplex WPM / NWPM heat pump controllers over Modbus TCP. The integration batches Modbus reads through a dedicated async pymodbus client, exposes sensors and binary sensors via a `DataUpdateCoordinator`, builds a device tree (Controller → HC1 → DHW → Smart Grid), and allows writing SG Ready mode as a select entity.
+Custom HACS integration for Dimplex **WPM / NWPM** heat-pump controllers over
+Modbus TCP. It is driven by a single canonical register table, groups entities
+under a device tree, and — crucially — ships a **native estimation engine** so
+installations **without** an electricity meter or heat meter still get power,
+COP, heat-output, flow and energy figures.
 
-## Dimplex Modbus TCP documentation
+> Reference spec: Dimplex NWPM Modbus TCP —
+> https://dimplex.atlassian.net/wiki/spaces/DW/pages/3303571457/Modbus+TCP+Anbindung
 
-Reference specification for Dimplex heat pumps: https://dimplex.atlassian.net/wiki/spaces/DW/pages/3303571457/Modbus+TCP+Anbindung
+## Highlights
 
-## Features (v0.1.0)
+- **Register-table driven** (`registers.py`): one source of truth → ~100 read
+  entities. Status/lock/fault/sensor-error register **addresses are firmware-
+  version-aware** (H / J / L / M).
+- **Device profiles** (`profiles.py`): LAK9 calibration (Hz→W LUT, EN14511 COP
+  table) + a generic profile. Community models = one new profile file.
+- **Capabilities** (per install): electric meter, heat meter, external flow
+  sensor, inverter frequency. Declared in the setup wizard with an auto-hint
+  probe of the device.
+- **Measurement source matrix** — each power/heat/flow/COP/energy value is
+  `measured` (read from a meter register) when the hardware exists, otherwise
+  `estimated` by the engine. Entities carry a `source` attribute.
+- **Native energy** (kWh, `total_increasing`, restored across restarts) ready
+  for the Energy Dashboard; measured heat-meter counters use the digit-group
+  combination from the spec.
+- **Live calibration** of the estimation engine via `number` entities (write to
+  HA, not the pump).
+- **Control behind a gate** (`enable_control`, off by default): setpoints
+  (`number`) and modes (`select`, incl. SG Ready) write to the pump, range-
+  validated.
+- **Importable dashboards** (`dashboards/`), built-in cards only.
 
-- Config Flow and Options Flow (UI-first, stored in Config Entries).
-- Periodic batch polling of key registers (temperatures, status/lock/fault codes, SG Ready).
-- Human-friendly text sensors for status, lock, fault, and SG Ready.
-- Diagnostic binary sensors for `fault_active` and `lock_active`.
-- Controller info diagnostic sensor with host/port/unit, last update, and capabilities.
-- SG Ready mode writable as a select (`Hardware`, `Yellow`, `Green`, `Red`, `Deep Green`) gated by the Options Flow (disabled by default).
-- Optional toggles for write entities and future EMS/BMS features.
+## Device tree
 
-### Entities
-
-| Type | Entity | Register | Notes |
-| --- | --- | --- | --- |
-| sensor | controller_info | — | Attributes: host/port/unit_id, last_update, failure counter, capabilities |
-| sensor | outdoor_temperature | 1 (int16, 0.1°C) | Temperature °C |
-| sensor | return_temperature | 2 (int16, 0.1°C) | Temperature °C |
-| sensor | return_setpoint_temperature | 53 (int16, 0.1°C) | Temperature °C |
-| sensor | flow_temperature | 5 (int16, 0.1°C) | Temperature °C |
-| sensor | dhw_temperature | 3 (int16, 0.1°C) | Temperature °C |
-| sensor | status_code / status | 103 | Diagnostic + mapped text |
-| sensor | lock_code / lock | 104 | Diagnostic + mapped text |
-| sensor | fault_code / fault | 105 | Diagnostic + mapped text |
-| sensor | sensor_error_code / sensor_error | 106 | Diagnostic + mapped text |
-| sensor | sg_ready_code / sg_ready_state | 5167 | Diagnostic code + text |
-| binary_sensor | fault_active | derived | `True` when fault code ≠ 0 |
-| binary_sensor | lock_active | derived | `True` when lock code ≠ 0 |
-| select | sg_ready_mode | 5167 | Writable: Hardware / Yellow / Green / Red / Deep Green |
+`Dimplex WPM` (controller) → `Heating circuit 1`, `Domestic hot water`,
+`Heat source`, `Analytics`, and — when present — `Heating circuits 2/3`,
+`Swimming pool`, `Ventilation`, `Solar`, `Passive cooling`.
 
 ## Installation (HACS custom repository)
 
-1. In HACS → Integrations → ⋮ → **Custom repositories**, add this repo URL and select **Integration**.
-2. Install “Dimplex WPM”.
-3. Restart Home Assistant.
-4. Go to Settings → Devices & Services → **Add Integration** → search for “Dimplex WPM”.
+1. HACS → Integrations → ⋮ → **Custom repositories** → add this repo URL, type
+   **Integration**.
+2. Install **Dimplex WPM**, restart Home Assistant.
+3. Settings → Devices & Services → **Add Integration** → **Dimplex WPM**.
 
 ## Configuration
 
-Config Flow fields:
+**Step 1 (connection):** Host, Port (502), Unit ID (1), heat-pump **profile**
+(LAK9 / generic), **software version** (H/J/L/M, default M), scan interval,
+timeout.
 
-- **Host** (IP/DNS)
-- **Port** (default `502`)
-- **Unit ID** (default `1`)
-- **Scan interval** (seconds, default `30`)
-- **Timeout** (seconds, default `5`)
-- **Software version** (`H`, `J`, `L`, `M`)
-- **Register bank strategy**: `auto` (try input then holding), `holding`, or `input`
+**Step 2 (modules & metering):** which optional modules exist (HC2/3, pool,
+ventilation, solar, passive cooling) and which meters are present (electric /
+heat / flow sensor / inverter frequency). Suggestions are pre-filled from a
+device probe; without a meter the value is estimated.
 
-Options Flow:
+**Options** (re-configurable): scan interval, modules, capabilities, flow-sensor
+entity, include reverse-engineered registers, and **Enable control / write
+entities** (the write gate).
 
-- **Scan interval** override.
-- **Enable write entities** (gate for SG Ready select, default **off**).
-- **Enable EMS entities**, **BMS outdoor temp**, **external lock** (placeholders for upcoming releases).
+## Removal
 
-## How it works
+Settings → Devices & Services → Dimplex WPM → ⋮ → **Delete**. All entities and
+devices are removed with the config entry. To uninstall the code, remove the
+integration from HACS (or delete `custom_components/dimplex_wpm/`) and restart.
 
-- A dedicated async `pymodbus` TCP client manages connection/reconnect and register reads/writes.
-- `DataUpdateCoordinator` batches reads into contiguous ranges for efficiency.
-- Entities are thin wrappers reading from `coordinator.data` (`raw` and `derived` dicts).
-- SG Ready writes call `write_register` on register `5167`, mapping friendly strings to numeric codes.
-- Register addresses match the Dimplex documentation (1-based); the integration applies the Modbus client offset automatically.
+## Dashboards
 
-## Development roadmap
+Import `dashboards/dimplex_wpm.yaml` (Settings → Dashboards → New dashboard →
+Edit → raw configuration editor → paste). Five views: Overview, Heat & Energy,
+History, Control (only useful with the write gate on), Diagnostics/Calibration.
 
-- v0.1.0 (this repo): MVP read + SG Ready write.
-- v0.2.0: EMS/power registers, external lock, BMS outdoor temperature number entity.
-- Additional status/lock/fault map coverage based on field feedback.
+Entity ids follow the default-naming scheme documented in
+[`spec/ENTITY_IDS.md`](spec/ENTITY_IDS.md) — if you renamed entities, adjust the
+ids. The dashboards use only built-in cards; `apexcharts-card` is an optional
+upgrade for the Energy view (see `spec/DASHBOARD_DESIGN.md`).
 
-## Dashboard example
+For the Energy Dashboard, add **one** electrical-energy entity
+(`sensor.analytics_electrical_energy_est`, or the measured equivalent with an
+electric meter). The thermal (heat-delivered) sensors are not electricity — do
+not add them as grid consumption.
 
-A sample Lovelace board is available in `dimplex_dashboard.yaml` demonstrating status and temperature graphs. Import it into a manual dashboard to start visualizing the entities.
+## Notes & limitations
+
+- **Setpoint scaling** for some writable registers is assumed whole-°C (matches
+  the working YAML) and should be **verified on a real device** before relying
+  on writes. The control gate is off by default and writes are range-validated.
+- **Climate** thermostats for HC1 and DHW are available behind the control gate
+  (current temperature from a read sensor, target = the writable setpoint).
+- Estimation requires the LAK9 profile (calibration) + the inverter-frequency
+  register; the generic profile yields read-only entities.
+
+## Status / design
+
+This is the redesign branch. Architecture and rationale live in
+[`DESIGN.md`](DESIGN.md); the verified register map in
+[`spec/REGISTERS.md`](spec/REGISTERS.md). CI runs hassfest, HACS validation,
+ruff and pytest.
+
+**Quality scale** (self-assessment in
+[`custom_components/dimplex_wpm/quality_scale.yaml`](custom_components/dimplex_wpm/quality_scale.yaml)):
+most of Bronze and Silver is met (config flow, unload, error handling,
+parallel-updates, diagnostics, entity translations, async client). Open items
+before formally claiming a tier: HA-runtime test coverage (config flow +
+coordinator), `entry.runtime_data` migration, and Gold polish (icon
+translations, reconfigure flow, exception translations).

@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable, Iterable
 import inspect
 import logging
-from typing import Any, Callable, Iterable, Optional
+from typing import Any
 
 from pymodbus.client import AsyncModbusTcpClient
 from pymodbus.exceptions import ModbusException
@@ -29,7 +30,7 @@ class DimplexModbusClient:
         self._port = port
         self._unit_id = unit_id
         self._timeout = timeout
-        self._client: Optional[AsyncModbusTcpClient] = None
+        self._client: AsyncModbusTcpClient | None = None
         self._lock = asyncio.Lock()
 
     async def connect(self) -> None:
@@ -47,9 +48,12 @@ class DimplexModbusClient:
         LOGGER.debug("Connected to Modbus host %s:%s", self._host, self._port)
 
     async def close(self) -> None:
-        """Close the Modbus connection."""
+        """Close the Modbus connection (pymodbus 3.x close() is synchronous)."""
         if self._client:
-            await self._client.close()
+            try:
+                self._client.close()
+            except Exception as err:
+                LOGGER.debug("Error closing Modbus connection: %s", err)
             LOGGER.debug("Closed Modbus connection")
         self._client = None
 
@@ -70,12 +74,31 @@ class DimplexModbusClient:
         """Read input registers."""
         return await self._read("read_input_registers", address, count)
 
+    async def read_coils(self, address: int, count: int) -> list[bool] | None:
+        """Read coils (digital outputs/inputs)."""
+        async with self._lock:
+            await self._ensure_connected()
+            try:
+                assert self._client is not None
+                result = await self._client.read_coils(
+                    address=address,
+                    count=count,
+                    **self._unit_kwargs(self._client.read_coils),
+                )
+            except ModbusException as err:
+                LOGGER.error("Modbus coil read failed: %s", err)
+                raise
+            if result.isError():
+                LOGGER.warning("Modbus coil read error at %s: %s", address, result)
+                return None
+            return list(result.bits)[:count]
+
     async def write_register(self, address: int, value: int) -> None:
         """Write a single holding register."""
         address += REGISTER_OFFSET
         async with self._lock:
-            await self._ensure_connected()
             try:
+                await self._ensure_connected()
                 assert self._client is not None
                 result = await self._client.write_register(
                     address, value, **self._unit_kwargs(self._client.write_register)
@@ -83,6 +106,11 @@ class DimplexModbusClient:
             except ModbusException as err:
                 LOGGER.error("Modbus write failed: %s", err)
                 raise
+            except (ConnectionError, OSError) as err:
+                # connect() raises builtin ConnectionError; map to ModbusException
+                # so entity write handlers surface a friendly HomeAssistantError.
+                LOGGER.error("Modbus write connection failed: %s", err)
+                raise ModbusException(f"Connection failed: {err}") from err
             if result.isError():
                 raise ModbusException(f"Write error: {result}")
             LOGGER.debug("Wrote register %s=%s", address, value)

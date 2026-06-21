@@ -3,64 +3,166 @@
   "config": {
     "step": {
       "user": {
-        "title": "Dimplex WPM",
-        "description": "Connect to your Dimplex WPM/NWPM controller.",
+        "title": "Connect to Dimplex WPM",
+        "description": "Connect to your Dimplex WPM/NWPM controller over Modbus TCP.",
         "data": {
           "host": "Host",
           "port": "Port",
           "unit_id": "Unit ID",
+          "profile": "Heat-pump model (profile)",
+          "software_version": "WPM software version (H/J/L/M)",
           "scan_interval": "Scan interval (seconds)",
-          "timeout": "Timeout (seconds)",
-          "software_version": "Software version (H/J/L/M)",
-          "register_strategy": "Register bank strategy"
+          "timeout": "Timeout (seconds)"
+        }
+      },
+      "features": {
+        "title": "Installed modules & metering",
+        "description": "Select the modules your installation has and which meters are present. Suggestions are pre-filled from a probe of the device. Without a meter, the corresponding value is estimated.",
+        "data": {
+          "enabled_modules": "Optional modules present",
+          "has_electric_meter": "Electrical power meter present (register 5170)",
+          "has_heat_meter": "Heat meter present (registers 5168/5096-5129)",
+          "has_flow_sensor": "External flow sensor present",
+          "flow_sensor_entity": "Flow sensor entity (optional)",
+          "has_inverter_freq": "Inverter frequency available (register 114)",
+          "include_re_registers": "Include reverse-engineered registers"
         }
       }
     },
     "error": {
-      "cannot_connect": "Unable to connect to device"
+      "cannot_connect": "Unable to connect to the device"
     },
     "abort": {
-      "already_configured": "Device is already configured"
+      "already_configured": "This device is already configured"
     }
   },
   "options": {
     "step": {
       "init": {
+        "title": "Dimplex WPM options",
         "data": {
           "scan_interval": "Scan interval (seconds)",
-          "enable_write_entities": "Enable write entities",
-          "enable_ems_entities": "Enable EMS entities",
-          "enable_bms_temp": "Enable BMS outdoor temperature entity",
-          "enable_external_lock": "Enable external lock entity"
+          "enabled_modules": "Optional modules present",
+          "has_electric_meter": "Electrical power meter present (register 5170)",
+          "has_heat_meter": "Heat meter present (registers 5168/5096-5129)",
+          "has_flow_sensor": "External flow sensor present",
+          "flow_sensor_entity": "Flow sensor entity (optional)",
+          "has_inverter_freq": "Inverter frequency available (register 114)",
+          "include_re_registers": "Include reverse-engineered registers",
+          "enable_write_entities": "Enable control / write entities (advanced)"
         }
       }
     }
   },
   "entity": {
     "sensor": {
+      "alpha_house": {
+        "name": "House heat fraction"
+      },
+      "compressor_power_estimated": {
+        "name": "Compressor power (est.)"
+      },
       "controller_info": {
         "name": "Controller info"
       },
-      "outdoor_temperature": {
-        "name": "Outdoor temperature"
+      "cooling_flow_temperature": {
+        "name": "Flow temperature"
       },
-      "return_temperature": {
+      "cooling_primary_return_temperature": {
+        "name": "Primary return temperature"
+      },
+      "cooling_return_temperature": {
         "name": "Return temperature"
       },
-      "return_setpoint_temperature": {
-        "name": "Return setpoint temperature"
+      "cop_estimated": {
+        "name": "COP (est.)"
       },
-      "flow_temperature": {
-        "name": "Flow temperature"
+      "cop_measured": {
+        "name": "COP (measured)"
+      },
+      "ddelta_t_dt": {
+        "name": "Temperature difference rate"
+      },
+      "delta_t": {
+        "name": "Temperature difference"
+      },
+      "dhw_setpoint_temperature": {
+        "name": "DHW setpoint temperature"
       },
       "dhw_temperature": {
         "name": "DHW temperature"
       },
-      "status_code": {
-        "name": "Status code"
+      "electrical_energy_kwh": {
+        "name": "Electrical energy"
       },
-      "status_text": {
-        "name": "Status"
+      "electrical_power": {
+        "name": "Electrical power (meter)"
+      },
+      "electrical_power_best": {
+        "name": "Electrical power"
+      },
+      "energy_dhw": {
+        "name": "DHW energy (meter)"
+      },
+      "energy_environment": {
+        "name": "Environmental energy (meter)"
+      },
+      "energy_heating": {
+        "name": "Heating energy (meter)"
+      },
+      "energy_pool": {
+        "name": "Pool energy (meter)"
+      },
+      "fault_code": {
+        "name": "Fault code"
+      },
+      "fault_text": {
+        "name": "Fault"
+      },
+      "flow_rate": {
+        "name": "Flow rate"
+      },
+      "flow_rate_smoothed": {
+        "name": "Flow rate (smoothed)"
+      },
+      "flow_temperature": {
+        "name": "Flow temperature"
+      },
+      "hc2_setpoint_temperature": {
+        "name": "HC2 setpoint temperature"
+      },
+      "hc2_temperature": {
+        "name": "HC2 temperature"
+      },
+      "hc3_setpoint_temperature": {
+        "name": "HC3 setpoint temperature"
+      },
+      "hc3_temperature": {
+        "name": "HC3 temperature"
+      },
+      "heat_energy_kwh": {
+        "name": "Heat energy"
+      },
+      "heat_energy_to_house_kwh": {
+        "name": "Heat energy to house"
+      },
+      "heat_energy_to_installation_kwh": {
+        "name": "Heat energy to installation"
+      },
+      "heat_output_best": {
+        "name": "Heat output"
+      },
+      "heat_output_power": {
+        "name": "Heat output power"
+      },
+      "heater_power_estimated": {
+        "name": "Heater power (est.)"
+      },
+      "holiday_days": {
+        "name": "Holiday days"
+      },
+      "inverter_frequency": {
+        "name": "Inverter frequency"
       },
       "lock_code": {
         "name": "Lock code"
@@ -68,11 +170,62 @@
       "lock_text": {
         "name": "Lock"
       },
-      "fault_code": {
-        "name": "Fault code"
+      "operating_mode": {
+        "name": "Operating mode"
       },
-      "fault_text": {
-        "name": "Fault"
+      "outdoor_temperature": {
+        "name": "Outdoor temperature"
+      },
+      "party_hours": {
+        "name": "Party hours"
+      },
+      "pv_surplus": {
+        "name": "PV surplus"
+      },
+      "return_setpoint_temperature": {
+        "name": "Return setpoint temperature"
+      },
+      "return_temperature": {
+        "name": "Return temperature"
+      },
+      "room_humidity_1": {
+        "name": "Room humidity 1"
+      },
+      "room_humidity_2": {
+        "name": "Room humidity 2"
+      },
+      "room_temperature_1": {
+        "name": "Room temperature 1"
+      },
+      "room_temperature_2": {
+        "name": "Room temperature 2"
+      },
+      "runtime_2nd_heat_generator": {
+        "name": "2nd heat generator runtime"
+      },
+      "runtime_aux_circulation_pump": {
+        "name": "Auxiliary circulation pump runtime"
+      },
+      "runtime_compressor_1": {
+        "name": "Compressor 1 runtime"
+      },
+      "runtime_compressor_2": {
+        "name": "Compressor 2 runtime"
+      },
+      "runtime_dhw_pump": {
+        "name": "DHW pump runtime"
+      },
+      "runtime_heating_pump_m13": {
+        "name": "Heating pump M13 runtime"
+      },
+      "runtime_immersion_heater": {
+        "name": "Immersion heater runtime"
+      },
+      "runtime_pool_pump": {
+        "name": "Pool pump runtime"
+      },
+      "runtime_primary_pump": {
+        "name": "Primary pump / fan runtime"
       },
       "sensor_error_code": {
         "name": "Sensor error code"
@@ -85,19 +238,218 @@
       },
       "sg_ready_text": {
         "name": "SG Ready state"
+      },
+      "solar_collector_temperature": {
+        "name": "Collector temperature"
+      },
+      "solar_tank_temperature": {
+        "name": "Tank temperature"
+      },
+      "source_inlet_temperature": {
+        "name": "Source inlet temperature"
+      },
+      "source_outlet_temperature": {
+        "name": "Source outlet temperature"
+      },
+      "status_code": {
+        "name": "Status code"
+      },
+      "status_text": {
+        "name": "Status"
+      },
+      "thermal_power_compressor": {
+        "name": "Compressor heat output (est.)"
+      },
+      "thermal_power_defrost_loss": {
+        "name": "Defrost heat loss (est.)"
+      },
+      "thermal_power_heater": {
+        "name": "Heater heat output (est.)"
+      },
+      "thermal_power_loop": {
+        "name": "Loop heat output (est.)"
+      },
+      "thermal_power_to_house": {
+        "name": "Heat to house (est.)"
+      },
+      "thermal_power_to_installation": {
+        "name": "Heat to installation (est.)"
+      },
+      "total_power_estimated": {
+        "name": "Total electrical power (est.)"
+      },
+      "vent_exhaust_air_temperature": {
+        "name": "Exhaust air temperature"
+      },
+      "vent_extract_air_temperature": {
+        "name": "Extract air temperature"
+      },
+      "vent_extract_fan_speed": {
+        "name": "Extract fan speed"
+      },
+      "vent_level": {
+        "name": "Fan level"
+      },
+      "vent_outdoor_air_temperature": {
+        "name": "Outdoor air temperature"
+      },
+      "vent_supply_air_temperature": {
+        "name": "Supply air temperature"
+      },
+      "vent_supply_fan_speed": {
+        "name": "Supply fan speed"
       }
     },
     "binary_sensor": {
+      "external_lockout": {
+        "name": "External lockout"
+      },
       "fault_active": {
         "name": "Fault active"
       },
       "lock_active": {
         "name": "Lock active"
+      },
+      "output_2nd_heat_generator": {
+        "name": "2nd heat generator"
+      },
+      "output_aux_circulation_pump": {
+        "name": "Auxiliary circulation pump"
+      },
+      "output_compressor_1": {
+        "name": "Compressor 1"
+      },
+      "output_compressor_2": {
+        "name": "Compressor 2"
+      },
+      "output_cooling_pump": {
+        "name": "Cooling pump"
+      },
+      "output_dhw_pump": {
+        "name": "DHW pump"
+      },
+      "output_general_fault": {
+        "name": "General fault output"
+      },
+      "output_heat_cool_changeover": {
+        "name": "Heat/cool changeover"
+      },
+      "output_heating_pump_m13": {
+        "name": "Heating pump M13"
+      },
+      "output_heating_pump_m14": {
+        "name": "Heating pump M14"
+      },
+      "output_heating_pump_m15": {
+        "name": "Heating pump M15"
+      },
+      "output_heating_pump_m20": {
+        "name": "Heating pump M20"
+      },
+      "output_immersion_heater": {
+        "name": "Immersion heater"
+      },
+      "output_mixer_m21_close": {
+        "name": "Mixer M21 close"
+      },
+      "output_mixer_m21_open": {
+        "name": "Mixer M21 open"
+      },
+      "output_mixer_m22_close": {
+        "name": "Mixer M22 close"
+      },
+      "output_mixer_m22_open": {
+        "name": "Mixer M22 open"
+      },
+      "output_pool_pump": {
+        "name": "Pool pump"
+      },
+      "output_primary_cooling_pump": {
+        "name": "Primary cooling pump"
+      },
+      "output_primary_pump": {
+        "name": "Primary pump / fan"
+      },
+      "output_solar_pump": {
+        "name": "Solar pump"
+      },
+      "smartgrid_input_1": {
+        "name": "SmartGrid input 1"
+      },
+      "smartgrid_input_2": {
+        "name": "SmartGrid input 2"
+      },
+      "utility_lockout": {
+        "name": "Utility (EVU) lockout"
+      }
+    },
+    "number": {
+      "cal_alpha_base": {
+        "name": "Calibration: alpha base"
+      },
+      "cal_alpha_deadband": {
+        "name": "Calibration: alpha deadband"
+      },
+      "cal_alpha_sensitivity": {
+        "name": "Calibration: alpha sensitivity"
+      },
+      "cal_heater_w": {
+        "name": "Calibration: 2nd-source heater power"
+      },
+      "cal_k_defrost": {
+        "name": "Calibration: defrost power factor"
+      },
+      "cal_k_defrost_loss": {
+        "name": "Calibration: defrost heat-loss factor"
+      },
+      "cal_k_dhw": {
+        "name": "Calibration: DHW power factor"
+      },
+      "cal_pump_floor_w": {
+        "name": "Calibration: floor pump power"
+      },
+      "cal_pump_main_w": {
+        "name": "Calibration: main pump power"
+      },
+      "set_dhw_setpoint": {
+        "name": "DHW setpoint"
+      },
+      "set_dhw_setpoint_max": {
+        "name": "DHW setpoint maximum"
+      },
+      "set_dhw_setpoint_min": {
+        "name": "DHW setpoint minimum"
+      },
+      "set_hc1_curve_end": {
+        "name": "HC1 heating curve end"
+      },
+      "set_hc1_curve_offset": {
+        "name": "HC1 curve offset"
+      },
+      "set_hc1_fixed_flow": {
+        "name": "HC1 fixed flow setpoint"
+      },
+      "set_hc1_room_setpoint": {
+        "name": "HC1 room setpoint"
+      },
+      "set_hc23_cooling_setpoint": {
+        "name": "HC2/3 cooling room setpoint"
+      },
+      "set_pool_setpoint": {
+        "name": "Pool setpoint"
       }
     },
     "select": {
+      "set_operating_mode": {
+        "name": "Operating mode"
+      },
       "sg_ready_mode": {
         "name": "SG Ready mode"
+      }
+    },
+    "climate": {
+      "thermostat": {
+        "name": "Thermostat"
       }
     }
   }

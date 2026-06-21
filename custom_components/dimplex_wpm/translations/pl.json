@@ -1,0 +1,456 @@
+{
+  "title": "Dimplex WPM",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Połączenie z Dimplex WPM",
+        "description": "Połącz ze sterownikiem Dimplex WPM/NWPM przez Modbus TCP.",
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "unit_id": "ID urządzenia (Unit ID)",
+          "profile": "Model pompy ciepła (profil)",
+          "software_version": "Wersja oprogramowania WPM (H/J/L/M)",
+          "scan_interval": "Interwał odpytywania (s)",
+          "timeout": "Limit czasu (s)"
+        }
+      },
+      "features": {
+        "title": "Zainstalowane moduły i pomiary",
+        "description": "Wybierz moduły obecne w instalacji oraz dostępne liczniki. Podpowiedzi pochodzą z odczytu próbnego urządzenia. Bez licznika dana wielkość jest estymowana.",
+        "data": {
+          "enabled_modules": "Obecne moduły opcjonalne",
+          "has_electric_meter": "Licznik energii elektrycznej (rejestr 5170)",
+          "has_heat_meter": "Ciepłomierz (rejestry 5168/5096-5129)",
+          "has_flow_sensor": "Zewnętrzny czujnik przepływu",
+          "flow_sensor_entity": "Encja czujnika przepływu (opcjonalnie)",
+          "has_inverter_freq": "Dostępna częstotliwość inwertera (rejestr 114)",
+          "include_re_registers": "Dołącz rejestry z reverse engineeringu"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Nie można połączyć się z urządzeniem"
+    },
+    "abort": {
+      "already_configured": "To urządzenie jest już skonfigurowane"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opcje Dimplex WPM",
+        "data": {
+          "scan_interval": "Interwał odpytywania (s)",
+          "enabled_modules": "Obecne moduły opcjonalne",
+          "has_electric_meter": "Licznik energii elektrycznej (rejestr 5170)",
+          "has_heat_meter": "Ciepłomierz (rejestry 5168/5096-5129)",
+          "has_flow_sensor": "Zewnętrzny czujnik przepływu",
+          "flow_sensor_entity": "Encja czujnika przepływu (opcjonalnie)",
+          "has_inverter_freq": "Dostępna częstotliwość inwertera (rejestr 114)",
+          "include_re_registers": "Dołącz rejestry z reverse engineeringu",
+          "enable_write_entities": "Włącz encje sterujące / zapis (zaawansowane)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "alpha_house": {
+        "name": "Udział ciepła do domu"
+      },
+      "compressor_power_estimated": {
+        "name": "Moc sprężarki (szac.)"
+      },
+      "controller_info": {
+        "name": "Informacje o sterowniku"
+      },
+      "cooling_flow_temperature": {
+        "name": "Temperatura zasilania chłodzenia pasywnego"
+      },
+      "cooling_primary_return_temperature": {
+        "name": "Temperatura powrotu pierwotnego chłodzenia"
+      },
+      "cooling_return_temperature": {
+        "name": "Temperatura powrotu chłodzenia pasywnego"
+      },
+      "cop_estimated": {
+        "name": "COP (szac.)"
+      },
+      "cop_measured": {
+        "name": "COP (zmierzony)"
+      },
+      "ddelta_t_dt": {
+        "name": "Szybkość zmian różnicy temperatur"
+      },
+      "delta_t": {
+        "name": "Różnica temperatur"
+      },
+      "dhw_setpoint_temperature": {
+        "name": "Nastawa temperatury CWU"
+      },
+      "dhw_temperature": {
+        "name": "Temperatura CWU"
+      },
+      "electrical_energy_kwh": {
+        "name": "Energia elektryczna"
+      },
+      "electrical_power": {
+        "name": "Moc elektryczna (licznik)"
+      },
+      "electrical_power_best": {
+        "name": "Moc elektryczna"
+      },
+      "energy_dhw": {
+        "name": "Energia CWU (licznik)"
+      },
+      "energy_environment": {
+        "name": "Energia środowiskowa (licznik)"
+      },
+      "energy_heating": {
+        "name": "Energia ogrzewania (licznik)"
+      },
+      "energy_pool": {
+        "name": "Energia basenu (licznik)"
+      },
+      "fault_code": {
+        "name": "Kod usterki"
+      },
+      "fault_text": {
+        "name": "Usterka"
+      },
+      "flow_rate": {
+        "name": "Przepływ"
+      },
+      "flow_rate_smoothed": {
+        "name": "Przepływ (wygładzony)"
+      },
+      "flow_temperature": {
+        "name": "Temperatura zasilania"
+      },
+      "hc2_setpoint_temperature": {
+        "name": "Nastawa temperatury HC2"
+      },
+      "hc2_temperature": {
+        "name": "Temperatura obiegu HC2"
+      },
+      "hc3_setpoint_temperature": {
+        "name": "Nastawa temperatury HC3"
+      },
+      "hc3_temperature": {
+        "name": "Temperatura obiegu HC3"
+      },
+      "heat_energy_kwh": {
+        "name": "Energia cieplna"
+      },
+      "heat_energy_to_house_kwh": {
+        "name": "Energia cieplna do domu"
+      },
+      "heat_energy_to_installation_kwh": {
+        "name": "Energia cieplna do instalacji"
+      },
+      "heat_output_best": {
+        "name": "Moc cieplna"
+      },
+      "heat_output_power": {
+        "name": "Moc cieplna"
+      },
+      "heater_power_estimated": {
+        "name": "Moc grzałki (szac.)"
+      },
+      "holiday_days": {
+        "name": "Dni urlopu"
+      },
+      "inverter_frequency": {
+        "name": "Częstotliwość inwertera"
+      },
+      "lock_code": {
+        "name": "Kod blokady"
+      },
+      "lock_text": {
+        "name": "Blokada"
+      },
+      "operating_mode": {
+        "name": "Tryb pracy"
+      },
+      "outdoor_temperature": {
+        "name": "Temperatura zewnętrzna"
+      },
+      "party_hours": {
+        "name": "Godziny party"
+      },
+      "pv_surplus": {
+        "name": "Nadwyżka PV"
+      },
+      "return_setpoint_temperature": {
+        "name": "Nastawa temperatury powrotu"
+      },
+      "return_temperature": {
+        "name": "Temperatura powrotu"
+      },
+      "room_humidity_1": {
+        "name": "Wilgotność pomieszczenia 1"
+      },
+      "room_humidity_2": {
+        "name": "Wilgotność pomieszczenia 2"
+      },
+      "room_temperature_1": {
+        "name": "Temperatura pomieszczenia 1"
+      },
+      "room_temperature_2": {
+        "name": "Temperatura pomieszczenia 2"
+      },
+      "runtime_2nd_heat_generator": {
+        "name": "Czas pracy drugiego źródła ciepła"
+      },
+      "runtime_aux_circulation_pump": {
+        "name": "Czas pracy pomocniczej pompy cyrkulacyjnej"
+      },
+      "runtime_compressor_1": {
+        "name": "Czas pracy sprężarki 1"
+      },
+      "runtime_compressor_2": {
+        "name": "Czas pracy sprężarki 2"
+      },
+      "runtime_dhw_pump": {
+        "name": "Czas pracy pompy CWU"
+      },
+      "runtime_heating_pump_m13": {
+        "name": "Czas pracy pompy obiegowej M13"
+      },
+      "runtime_immersion_heater": {
+        "name": "Czas pracy grzałki zanurzeniowej"
+      },
+      "runtime_pool_pump": {
+        "name": "Czas pracy pompy basenowej"
+      },
+      "runtime_primary_pump": {
+        "name": "Czas pracy pompy pierwotnej / wentylatora"
+      },
+      "sensor_error_code": {
+        "name": "Kod błędu czujnika"
+      },
+      "sensor_error_text": {
+        "name": "Błąd czujnika"
+      },
+      "sg_ready_code": {
+        "name": "Kod SG Ready"
+      },
+      "sg_ready_text": {
+        "name": "Stan SG Ready"
+      },
+      "solar_collector_temperature": {
+        "name": "Temperatura kolektora słonecznego"
+      },
+      "solar_tank_temperature": {
+        "name": "Temperatura zasobnika solarnego"
+      },
+      "source_inlet_temperature": {
+        "name": "Temperatura wlotu dolnego źródła"
+      },
+      "source_outlet_temperature": {
+        "name": "Temperatura wylotu dolnego źródła"
+      },
+      "status_code": {
+        "name": "Kod statusu"
+      },
+      "status_text": {
+        "name": "Status"
+      },
+      "thermal_power_compressor": {
+        "name": "Moc cieplna sprężarki (szac.)"
+      },
+      "thermal_power_defrost_loss": {
+        "name": "Strata ciepła na odszranianie (szac.)"
+      },
+      "thermal_power_heater": {
+        "name": "Moc cieplna grzałki (szac.)"
+      },
+      "thermal_power_loop": {
+        "name": "Moc cieplna obiegu (szac.)"
+      },
+      "thermal_power_to_house": {
+        "name": "Ciepło do domu (szac.)"
+      },
+      "thermal_power_to_installation": {
+        "name": "Ciepło do instalacji (szac.)"
+      },
+      "total_power_estimated": {
+        "name": "Całkowita moc elektryczna (szac.)"
+      },
+      "vent_exhaust_air_temperature": {
+        "name": "Temperatura powietrza wyrzucanego"
+      },
+      "vent_extract_air_temperature": {
+        "name": "Temperatura powietrza wywiewanego"
+      },
+      "vent_extract_fan_speed": {
+        "name": "Prędkość wentylatora wywiewnego"
+      },
+      "vent_level": {
+        "name": "Poziom wentylacji"
+      },
+      "vent_outdoor_air_temperature": {
+        "name": "Temperatura powietrza zewnętrznego wentylacji"
+      },
+      "vent_supply_air_temperature": {
+        "name": "Temperatura powietrza nawiewanego"
+      },
+      "vent_supply_fan_speed": {
+        "name": "Prędkość wentylatora nawiewnego"
+      }
+    },
+    "binary_sensor": {
+      "external_lockout": {
+        "name": "Blokada zewnętrzna"
+      },
+      "fault_active": {
+        "name": "Aktywna usterka"
+      },
+      "lock_active": {
+        "name": "Aktywna blokada"
+      },
+      "output_2nd_heat_generator": {
+        "name": "Drugie źródło ciepła"
+      },
+      "output_aux_circulation_pump": {
+        "name": "Pomocnicza pompa cyrkulacyjna"
+      },
+      "output_compressor_1": {
+        "name": "Sprężarka 1"
+      },
+      "output_compressor_2": {
+        "name": "Sprężarka 2"
+      },
+      "output_cooling_pump": {
+        "name": "Pompa chłodzenia"
+      },
+      "output_dhw_pump": {
+        "name": "Pompa CWU"
+      },
+      "output_general_fault": {
+        "name": "Wyjście usterki ogólnej"
+      },
+      "output_heat_cool_changeover": {
+        "name": "Przełączenie grzanie/chłodzenie"
+      },
+      "output_heating_pump_m13": {
+        "name": "Pompa obiegowa M13"
+      },
+      "output_heating_pump_m14": {
+        "name": "Pompa obiegowa M14"
+      },
+      "output_heating_pump_m15": {
+        "name": "Pompa obiegowa M15"
+      },
+      "output_heating_pump_m20": {
+        "name": "Pompa obiegowa M20"
+      },
+      "output_immersion_heater": {
+        "name": "Grzałka zanurzeniowa"
+      },
+      "output_mixer_m21_close": {
+        "name": "Zawór mieszający M21 zamknięty"
+      },
+      "output_mixer_m21_open": {
+        "name": "Zawór mieszający M21 otwarty"
+      },
+      "output_mixer_m22_close": {
+        "name": "Zawór mieszający M22 zamknięty"
+      },
+      "output_mixer_m22_open": {
+        "name": "Zawór mieszający M22 otwarty"
+      },
+      "output_pool_pump": {
+        "name": "Pompa basenowa"
+      },
+      "output_primary_cooling_pump": {
+        "name": "Pierwotna pompa chłodzenia"
+      },
+      "output_primary_pump": {
+        "name": "Pompa pierwotna / wentylator"
+      },
+      "output_solar_pump": {
+        "name": "Pompa solarna"
+      },
+      "smartgrid_input_1": {
+        "name": "Wejście SmartGrid 1"
+      },
+      "smartgrid_input_2": {
+        "name": "Wejście SmartGrid 2"
+      },
+      "utility_lockout": {
+        "name": "Blokada zakładu energetycznego (EVU)"
+      }
+    },
+    "number": {
+      "cal_alpha_base": {
+        "name": "Kalibracja: baza alfa"
+      },
+      "cal_alpha_deadband": {
+        "name": "Kalibracja: strefa nieczułości alfa"
+      },
+      "cal_alpha_sensitivity": {
+        "name": "Kalibracja: czułość alfa"
+      },
+      "cal_heater_w": {
+        "name": "Kalibracja: moc grzałki drugiego źródła"
+      },
+      "cal_k_defrost": {
+        "name": "Kalibracja: współczynnik mocy odszraniania"
+      },
+      "cal_k_defrost_loss": {
+        "name": "Kalibracja: współczynnik strat ciepła odszraniania"
+      },
+      "cal_k_dhw": {
+        "name": "Kalibracja: współczynnik mocy CWU"
+      },
+      "cal_pump_floor_w": {
+        "name": "Kalibracja: moc pompy podłogowej"
+      },
+      "cal_pump_main_w": {
+        "name": "Kalibracja: moc pompy głównej"
+      },
+      "set_dhw_setpoint": {
+        "name": "Nastawa CWU"
+      },
+      "set_dhw_setpoint_max": {
+        "name": "Maksymalna nastawa CWU"
+      },
+      "set_dhw_setpoint_min": {
+        "name": "Minimalna nastawa CWU"
+      },
+      "set_hc1_curve_end": {
+        "name": "Koniec krzywej grzewczej HC1"
+      },
+      "set_hc1_curve_offset": {
+        "name": "Przesunięcie krzywej HC1"
+      },
+      "set_hc1_fixed_flow": {
+        "name": "Stała nastawa zasilania HC1"
+      },
+      "set_hc1_room_setpoint": {
+        "name": "Nastawa pomieszczenia HC1"
+      },
+      "set_hc23_cooling_setpoint": {
+        "name": "Nastawa pomieszczenia chłodzenia HC2/3"
+      },
+      "set_pool_setpoint": {
+        "name": "Nastawa basenu"
+      }
+    },
+    "select": {
+      "set_operating_mode": {
+        "name": "Tryb pracy"
+      },
+      "sg_ready_mode": {
+        "name": "Tryb SG Ready"
+      }
+    },
+    "climate": {
+      "thermostat": {
+        "name": "Termostat"
+      }
+    }
+  }
+}

@@ -1,0 +1,456 @@
+{
+  "title": "Dimplex WPM",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Verbindung mit Dimplex WPM",
+        "description": "Verbinden Sie sich mit Ihrem Dimplex WPM/NWPM-Regler über Modbus TCP.",
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "unit_id": "Geräte-ID (Unit ID)",
+          "profile": "Wärmepumpen-Modell (Profil)",
+          "software_version": "WPM-Softwareversion (H/J/L/M)",
+          "scan_interval": "Abfrageintervall (s)",
+          "timeout": "Zeitlimit (s)"
+        }
+      },
+      "features": {
+        "title": "Installierte Module & Zähler",
+        "description": "Wählen Sie die in Ihrer Anlage vorhandenen Module und Zähler. Vorschläge stammen aus einer Geräteabfrage. Ohne Zähler wird der Wert geschätzt.",
+        "data": {
+          "enabled_modules": "Vorhandene optionale Module",
+          "has_electric_meter": "Stromzähler vorhanden (Register 5170)",
+          "has_heat_meter": "Wärmemengenzähler vorhanden (Register 5168/5096-5129)",
+          "has_flow_sensor": "Externer Durchflusssensor vorhanden",
+          "flow_sensor_entity": "Durchflusssensor-Entität (optional)",
+          "has_inverter_freq": "Inverterfrequenz verfügbar (Register 114)",
+          "include_re_registers": "Reverse-Engineering-Register einbeziehen"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Verbindung zum Gerät nicht möglich"
+    },
+    "abort": {
+      "already_configured": "Dieses Gerät ist bereits konfiguriert"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Dimplex WPM Optionen",
+        "data": {
+          "scan_interval": "Abfrageintervall (s)",
+          "enabled_modules": "Vorhandene optionale Module",
+          "has_electric_meter": "Stromzähler vorhanden (Register 5170)",
+          "has_heat_meter": "Wärmemengenzähler vorhanden (Register 5168/5096-5129)",
+          "has_flow_sensor": "Externer Durchflusssensor vorhanden",
+          "flow_sensor_entity": "Durchflusssensor-Entität (optional)",
+          "has_inverter_freq": "Inverterfrequenz verfügbar (Register 114)",
+          "include_re_registers": "Reverse-Engineering-Register einbeziehen",
+          "enable_write_entities": "Steuer-/Schreibentitäten aktivieren (erweitert)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "alpha_house": {
+        "name": "Wärmeanteil Haus"
+      },
+      "compressor_power_estimated": {
+        "name": "Verdichterleistung (geschätzt)"
+      },
+      "controller_info": {
+        "name": "Reglerinformation"
+      },
+      "cooling_flow_temperature": {
+        "name": "Vorlauftemperatur passive Kühlung"
+      },
+      "cooling_primary_return_temperature": {
+        "name": "Primär-Rücklauftemperatur Kühlung"
+      },
+      "cooling_return_temperature": {
+        "name": "Rücklauftemperatur passive Kühlung"
+      },
+      "cop_estimated": {
+        "name": "COP (geschätzt)"
+      },
+      "cop_measured": {
+        "name": "COP (gemessen)"
+      },
+      "ddelta_t_dt": {
+        "name": "Änderungsrate Temperaturdifferenz"
+      },
+      "delta_t": {
+        "name": "Temperaturdifferenz"
+      },
+      "dhw_setpoint_temperature": {
+        "name": "Warmwasser-Sollwert"
+      },
+      "dhw_temperature": {
+        "name": "Warmwassertemperatur"
+      },
+      "electrical_energy_kwh": {
+        "name": "Elektrische Energie"
+      },
+      "electrical_power": {
+        "name": "Elektrische Leistung (Zähler)"
+      },
+      "electrical_power_best": {
+        "name": "Elektrische Leistung"
+      },
+      "energy_dhw": {
+        "name": "Warmwasserenergie (Zähler)"
+      },
+      "energy_environment": {
+        "name": "Umweltenergie (Zähler)"
+      },
+      "energy_heating": {
+        "name": "Heizenergie (Zähler)"
+      },
+      "energy_pool": {
+        "name": "Poolenergie (Zähler)"
+      },
+      "fault_code": {
+        "name": "Fehlercode"
+      },
+      "fault_text": {
+        "name": "Fehler"
+      },
+      "flow_rate": {
+        "name": "Durchfluss"
+      },
+      "flow_rate_smoothed": {
+        "name": "Durchfluss (geglättet)"
+      },
+      "flow_temperature": {
+        "name": "Vorlauftemperatur"
+      },
+      "hc2_setpoint_temperature": {
+        "name": "Heizkreis 2 Sollwert"
+      },
+      "hc2_temperature": {
+        "name": "Heizkreis 2 Temperatur"
+      },
+      "hc3_setpoint_temperature": {
+        "name": "Heizkreis 3 Sollwert"
+      },
+      "hc3_temperature": {
+        "name": "Heizkreis 3 Temperatur"
+      },
+      "heat_energy_kwh": {
+        "name": "Wärmeenergie"
+      },
+      "heat_energy_to_house_kwh": {
+        "name": "Wärmeenergie ins Haus"
+      },
+      "heat_energy_to_installation_kwh": {
+        "name": "Wärmeenergie in die Anlage"
+      },
+      "heat_output_best": {
+        "name": "Wärmeleistung"
+      },
+      "heat_output_power": {
+        "name": "Wärmeleistung"
+      },
+      "heater_power_estimated": {
+        "name": "Heizstableistung (geschätzt)"
+      },
+      "holiday_days": {
+        "name": "Urlaubstage"
+      },
+      "inverter_frequency": {
+        "name": "Inverterfrequenz"
+      },
+      "lock_code": {
+        "name": "Sperrcode"
+      },
+      "lock_text": {
+        "name": "Sperre"
+      },
+      "operating_mode": {
+        "name": "Betriebsmodus"
+      },
+      "outdoor_temperature": {
+        "name": "Außentemperatur"
+      },
+      "party_hours": {
+        "name": "Party-Stunden"
+      },
+      "pv_surplus": {
+        "name": "PV-Überschuss"
+      },
+      "return_setpoint_temperature": {
+        "name": "Rücklauf-Sollwert"
+      },
+      "return_temperature": {
+        "name": "Rücklauftemperatur"
+      },
+      "room_humidity_1": {
+        "name": "Raumfeuchte 1"
+      },
+      "room_humidity_2": {
+        "name": "Raumfeuchte 2"
+      },
+      "room_temperature_1": {
+        "name": "Raumtemperatur 1"
+      },
+      "room_temperature_2": {
+        "name": "Raumtemperatur 2"
+      },
+      "runtime_2nd_heat_generator": {
+        "name": "Laufzeit 2. Wärmeerzeuger"
+      },
+      "runtime_aux_circulation_pump": {
+        "name": "Laufzeit Zusatzumwälzpumpe"
+      },
+      "runtime_compressor_1": {
+        "name": "Laufzeit Verdichter 1"
+      },
+      "runtime_compressor_2": {
+        "name": "Laufzeit Verdichter 2"
+      },
+      "runtime_dhw_pump": {
+        "name": "Laufzeit Warmwasserpumpe"
+      },
+      "runtime_heating_pump_m13": {
+        "name": "Laufzeit Heizungspumpe M13"
+      },
+      "runtime_immersion_heater": {
+        "name": "Laufzeit Tauchheizkörper"
+      },
+      "runtime_pool_pump": {
+        "name": "Laufzeit Poolpumpe"
+      },
+      "runtime_primary_pump": {
+        "name": "Laufzeit Primärpumpe / Ventilator"
+      },
+      "sensor_error_code": {
+        "name": "Sensorfehlercode"
+      },
+      "sensor_error_text": {
+        "name": "Sensorfehler"
+      },
+      "sg_ready_code": {
+        "name": "SG Ready Code"
+      },
+      "sg_ready_text": {
+        "name": "SG Ready Status"
+      },
+      "solar_collector_temperature": {
+        "name": "Solarkollektortemperatur"
+      },
+      "solar_tank_temperature": {
+        "name": "Solarspeichertemperatur"
+      },
+      "source_inlet_temperature": {
+        "name": "Quelleneintrittstemperatur"
+      },
+      "source_outlet_temperature": {
+        "name": "Quellenaustrittstemperatur"
+      },
+      "status_code": {
+        "name": "Statuscode"
+      },
+      "status_text": {
+        "name": "Status"
+      },
+      "thermal_power_compressor": {
+        "name": "Wärmeleistung Verdichter (geschätzt)"
+      },
+      "thermal_power_defrost_loss": {
+        "name": "Abtau-Wärmeverlust (geschätzt)"
+      },
+      "thermal_power_heater": {
+        "name": "Wärmeleistung Heizstab (geschätzt)"
+      },
+      "thermal_power_loop": {
+        "name": "Wärmeleistung Kreis (geschätzt)"
+      },
+      "thermal_power_to_house": {
+        "name": "Wärme ins Haus (geschätzt)"
+      },
+      "thermal_power_to_installation": {
+        "name": "Wärme in die Anlage (geschätzt)"
+      },
+      "total_power_estimated": {
+        "name": "Gesamte elektrische Leistung (geschätzt)"
+      },
+      "vent_exhaust_air_temperature": {
+        "name": "Fortlufttemperatur"
+      },
+      "vent_extract_air_temperature": {
+        "name": "Ablufttemperatur"
+      },
+      "vent_extract_fan_speed": {
+        "name": "Abluftventilatordrehzahl"
+      },
+      "vent_level": {
+        "name": "Lüftungsstufe"
+      },
+      "vent_outdoor_air_temperature": {
+        "name": "Außenlufttemperatur"
+      },
+      "vent_supply_air_temperature": {
+        "name": "Zulufttemperatur"
+      },
+      "vent_supply_fan_speed": {
+        "name": "Zuluftventilatordrehzahl"
+      }
+    },
+    "binary_sensor": {
+      "external_lockout": {
+        "name": "Externe Sperre"
+      },
+      "fault_active": {
+        "name": "Fehler aktiv"
+      },
+      "lock_active": {
+        "name": "Sperre aktiv"
+      },
+      "output_2nd_heat_generator": {
+        "name": "2. Wärmeerzeuger"
+      },
+      "output_aux_circulation_pump": {
+        "name": "Zusatzumwälzpumpe"
+      },
+      "output_compressor_1": {
+        "name": "Verdichter 1"
+      },
+      "output_compressor_2": {
+        "name": "Verdichter 2"
+      },
+      "output_cooling_pump": {
+        "name": "Kühlpumpe"
+      },
+      "output_dhw_pump": {
+        "name": "Warmwasserpumpe"
+      },
+      "output_general_fault": {
+        "name": "Sammelstörungsausgang"
+      },
+      "output_heat_cool_changeover": {
+        "name": "Umschaltung Heizen/Kühlen"
+      },
+      "output_heating_pump_m13": {
+        "name": "Heizungspumpe M13"
+      },
+      "output_heating_pump_m14": {
+        "name": "Heizungspumpe M14"
+      },
+      "output_heating_pump_m15": {
+        "name": "Heizungspumpe M15"
+      },
+      "output_heating_pump_m20": {
+        "name": "Heizungspumpe M20"
+      },
+      "output_immersion_heater": {
+        "name": "Tauchheizkörper"
+      },
+      "output_mixer_m21_close": {
+        "name": "Mischer M21 zu"
+      },
+      "output_mixer_m21_open": {
+        "name": "Mischer M21 auf"
+      },
+      "output_mixer_m22_close": {
+        "name": "Mischer M22 zu"
+      },
+      "output_mixer_m22_open": {
+        "name": "Mischer M22 auf"
+      },
+      "output_pool_pump": {
+        "name": "Poolpumpe"
+      },
+      "output_primary_cooling_pump": {
+        "name": "Primär-Kühlpumpe"
+      },
+      "output_primary_pump": {
+        "name": "Primärpumpe / Ventilator"
+      },
+      "output_solar_pump": {
+        "name": "Solarpumpe"
+      },
+      "smartgrid_input_1": {
+        "name": "SmartGrid Eingang 1"
+      },
+      "smartgrid_input_2": {
+        "name": "SmartGrid Eingang 2"
+      },
+      "utility_lockout": {
+        "name": "EVU-Sperre"
+      }
+    },
+    "number": {
+      "cal_alpha_base": {
+        "name": "Kalibrierung: Alpha-Basis"
+      },
+      "cal_alpha_deadband": {
+        "name": "Kalibrierung: Alpha-Totband"
+      },
+      "cal_alpha_sensitivity": {
+        "name": "Kalibrierung: Alpha-Empfindlichkeit"
+      },
+      "cal_heater_w": {
+        "name": "Kalibrierung: Leistung 2. Wärmeerzeuger"
+      },
+      "cal_k_defrost": {
+        "name": "Kalibrierung: Abtau-Leistungsfaktor"
+      },
+      "cal_k_defrost_loss": {
+        "name": "Kalibrierung: Abtau-Wärmeverlustfaktor"
+      },
+      "cal_k_dhw": {
+        "name": "Kalibrierung: Warmwasser-Leistungsfaktor"
+      },
+      "cal_pump_floor_w": {
+        "name": "Kalibrierung: Leistung Fußbodenpumpe"
+      },
+      "cal_pump_main_w": {
+        "name": "Kalibrierung: Leistung Hauptpumpe"
+      },
+      "set_dhw_setpoint": {
+        "name": "Warmwasser-Sollwert"
+      },
+      "set_dhw_setpoint_max": {
+        "name": "Warmwasser-Sollwert Maximum"
+      },
+      "set_dhw_setpoint_min": {
+        "name": "Warmwasser-Sollwert Minimum"
+      },
+      "set_hc1_curve_end": {
+        "name": "Heizkreis 1 Heizkurven-Endpunkt"
+      },
+      "set_hc1_curve_offset": {
+        "name": "Heizkreis 1 Kurvenverschiebung"
+      },
+      "set_hc1_fixed_flow": {
+        "name": "Heizkreis 1 Festwert-Vorlauf-Sollwert"
+      },
+      "set_hc1_room_setpoint": {
+        "name": "Heizkreis 1 Raum-Sollwert"
+      },
+      "set_hc23_cooling_setpoint": {
+        "name": "Heizkreis 2/3 Kühl-Raum-Sollwert"
+      },
+      "set_pool_setpoint": {
+        "name": "Pool-Sollwert"
+      }
+    },
+    "select": {
+      "set_operating_mode": {
+        "name": "Betriebsmodus"
+      },
+      "sg_ready_mode": {
+        "name": "SG Ready Modus"
+      }
+    },
+    "climate": {
+      "thermostat": {
+        "name": "Thermostat"
+      }
+    }
+  }
+}
