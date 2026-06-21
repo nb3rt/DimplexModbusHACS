@@ -1,0 +1,57 @@
+{
+  "title": "Dimplex WPM",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Połączenie z Dimplex WPM",
+        "description": "Połącz ze sterownikiem Dimplex WPM/NWPM przez Modbus TCP.",
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "unit_id": "ID urządzenia (Unit ID)",
+          "profile": "Model pompy ciepła (profil)",
+          "software_version": "Wersja oprogramowania WPM (H/J/L/M)",
+          "scan_interval": "Interwał odpytywania (s)",
+          "timeout": "Limit czasu (s)"
+        }
+      },
+      "features": {
+        "title": "Zainstalowane moduły i pomiary",
+        "description": "Wybierz moduły obecne w instalacji oraz dostępne liczniki. Podpowiedzi pochodzą z odczytu próbnego urządzenia. Bez licznika dana wielkość jest estymowana.",
+        "data": {
+          "enabled_modules": "Obecne moduły opcjonalne",
+          "has_electric_meter": "Licznik energii elektrycznej (rejestr 5170)",
+          "has_heat_meter": "Ciepłomierz (rejestry 5168/5096-5129)",
+          "has_flow_sensor": "Zewnętrzny czujnik przepływu",
+          "flow_sensor_entity": "Encja czujnika przepływu (opcjonalnie)",
+          "has_inverter_freq": "Dostępna częstotliwość inwertera (rejestr 114)",
+          "include_re_registers": "Dołącz rejestry z reverse engineeringu"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Nie można połączyć się z urządzeniem"
+    },
+    "abort": {
+      "already_configured": "To urządzenie jest już skonfigurowane"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opcje Dimplex WPM",
+        "data": {
+          "scan_interval": "Interwał odpytywania (s)",
+          "enabled_modules": "Obecne moduły opcjonalne",
+          "has_electric_meter": "Licznik energii elektrycznej (rejestr 5170)",
+          "has_heat_meter": "Ciepłomierz (rejestry 5168/5096-5129)",
+          "has_flow_sensor": "Zewnętrzny czujnik przepływu",
+          "flow_sensor_entity": "Encja czujnika przepływu (opcjonalnie)",
+          "has_inverter_freq": "Dostępna częstotliwość inwertera (rejestr 114)",
+          "include_re_registers": "Dołącz rejestry z reverse engineeringu",
+          "enable_write_entities": "Włącz encje sterujące / zapis (zaawansowane)"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "title": "Dimplex WPM",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Verbindung mit Dimplex WPM",
+        "description": "Verbinden Sie sich mit Ihrem Dimplex WPM/NWPM-Regler über Modbus TCP.",
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "unit_id": "Geräte-ID (Unit ID)",
+          "profile": "Wärmepumpen-Modell (Profil)",
+          "software_version": "WPM-Softwareversion (H/J/L/M)",
+          "scan_interval": "Abfrageintervall (s)",
+          "timeout": "Zeitlimit (s)"
+        }
+      },
+      "features": {
+        "title": "Installierte Module & Zähler",
+        "description": "Wählen Sie die in Ihrer Anlage vorhandenen Module und Zähler. Vorschläge stammen aus einer Geräteabfrage. Ohne Zähler wird der Wert geschätzt.",
+        "data": {
+          "enabled_modules": "Vorhandene optionale Module",
+          "has_electric_meter": "Stromzähler vorhanden (Register 5170)",
+          "has_heat_meter": "Wärmemengenzähler vorhanden (Register 5168/5096-5129)",
+          "has_flow_sensor": "Externer Durchflusssensor vorhanden",
+          "flow_sensor_entity": "Durchflusssensor-Entität (optional)",
+          "has_inverter_freq": "Inverterfrequenz verfügbar (Register 114)",
+          "include_re_registers": "Reverse-Engineering-Register einbeziehen"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Verbindung zum Gerät nicht möglich"
+    },
+    "abort": {
+      "already_configured": "Dieses Gerät ist bereits konfiguriert"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Dimplex WPM Optionen",
+        "data": {
+          "scan_interval": "Abfrageintervall (s)",
+          "enabled_modules": "Vorhandene optionale Module",
+          "has_electric_meter": "Stromzähler vorhanden (Register 5170)",
+          "has_heat_meter": "Wärmemengenzähler vorhanden (Register 5168/5096-5129)",
+          "has_flow_sensor": "Externer Durchflusssensor vorhanden",
+          "flow_sensor_entity": "Durchflusssensor-Entität (optional)",
+          "has_inverter_freq": "Inverterfrequenz verfügbar (Register 114)",
+          "include_re_registers": "Reverse-Engineering-Register einbeziehen",
+          "enable_write_entities": "Steuer-/Schreibentitäten aktivieren (erweitert)"
+        }
+      }
+    }
+  }
+}
