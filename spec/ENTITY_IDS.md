@@ -1,9 +1,10 @@
 # Dimplex WPM — entity_id reference (derived scheme)
 
-> How HA builds these (confirmed by the pre-M3 audit): entities use
-> `has_entity_name = True` with `_attr_name`, **no** `translation_key` /
-> `suggested_object_id`. So `entity_id = <platform>.slugify("<device name> <entity name>")`.
-> The dashboards in `dashboards/` reference exactly these ids.
+> How HA builds these: entities use `has_entity_name = True` with a
+> `translation_key`. The entity_id is derived from the **English** entity name
+> (`entity_id = <platform>.slugify("<device name> <english name>")`), so ids are
+> language-independent even though display names are localized (en/pl/de). The
+> dashboards in `dashboards/` reference exactly these ids.
 >
 > **Assumes default naming** — if you rename a device/entity in HA, its
 > entity_id changes and you must update the dashboard reference.
@@ -85,9 +86,9 @@ is standard Home Assistant behaviour with `has_entity_name`.
 - `sensor.analytics_heat_to_house_est` · `..._heat_to_installation_est` · `..._house_heat_fraction`
 - `sensor.analytics_flow_rate` · `sensor.analytics_flow_rate_smoothed`
 - `sensor.analytics_temperature_difference` · `sensor.analytics_temperature_difference_rate`
-- energy (kWh, total_increasing): `sensor.analytics_electrical_energy_est`,
-  `sensor.analytics_heat_energy_est`, `sensor.analytics_heat_energy_to_house_est`,
-  `sensor.analytics_heat_energy_to_installation_est`
+- energy (kWh, total_increasing): `sensor.analytics_electrical_energy`,
+  `sensor.analytics_heat_energy`, `sensor.analytics_heat_energy_to_house`,
+  `sensor.analytics_heat_energy_to_installation`
 - calibration [config]: `number.analytics_calibration_dhw_power_factor`,
   `..._calibration_defrost_power_factor`, `..._calibration_defrost_heat_loss_factor`,
   `..._calibration_2nd_source_heater_power`, `..._calibration_main_pump_power`,
@@ -96,7 +97,7 @@ is standard Home Assistant behaviour with `has_entity_name`.
 
 With a heat meter: `sensor.analytics_heating_energy_meter`, `..._dhw_energy_meter`,
 `..._environmental_energy_meter` (+ `..._pool_energy_meter` with pool module);
-the estimated `..._heat_energy_est` is then suppressed (no double count).
+the estimated `..._heat_energy` is then suppressed (no double count).
 With an electric meter: `analytics_electrical_power` source becomes `measured`.
 
 ## Optional modules (only when enabled)

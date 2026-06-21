@@ -205,15 +205,15 @@ views:
               - change
             chart_type: bar
             entities:
-              - entity: sensor.analytics_electrical_energy_est
-              - entity: sensor.analytics_heat_energy_to_house_est
+              - entity: sensor.analytics_electrical_energy
+              - entity: sensor.analytics_heat_energy_to_house
           - type: entities
             title: Energy totals
             entities:
-              - entity: sensor.analytics_electrical_energy_est
-              - entity: sensor.analytics_heat_energy_est
-              - entity: sensor.analytics_heat_energy_to_house_est
-              - entity: sensor.analytics_heat_energy_to_installation_est
+              - entity: sensor.analytics_electrical_energy
+              - entity: sensor.analytics_heat_energy
+              - entity: sensor.analytics_heat_energy_to_house
+              - entity: sensor.analytics_heat_energy_to_installation
               - entity: sensor.analytics_heating_energy_meter
                 visibility:
                   - condition: state

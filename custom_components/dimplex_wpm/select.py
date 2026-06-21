@@ -57,7 +57,7 @@ class DimplexSGReadySelect(CoordinatorEntity, SelectEntity):
     """Representation of the SG Ready mode select."""
 
     _attr_has_entity_name = True
-    _attr_name = "SG Ready mode"
+    _attr_translation_key = "sg_ready_mode"
 
     def __init__(
         self,

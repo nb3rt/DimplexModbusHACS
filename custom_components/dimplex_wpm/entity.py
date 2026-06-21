@@ -31,8 +31,10 @@ class DimplexEntityMixin:
     ) -> None:
         self._dimplex_key = key
         self._attr_unique_id = f"{entry.entry_id}_{module}_{key}"
-        if name is not None:
-            self._attr_name = name
+        # Names come from translations (translation_key); the English string in
+        # strings.json/en.json equals the former _attr_name, so entity_ids stay
+        # stable and language-independent. ``name`` is kept for reference only.
+        self._attr_translation_key = key
         configuration_url = f"http://{host}" if host else None
         self._attr_device_info = build_device_info(
             entry,
