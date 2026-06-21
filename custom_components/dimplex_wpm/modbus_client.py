@@ -48,9 +48,12 @@ class DimplexModbusClient:
         LOGGER.debug("Connected to Modbus host %s:%s", self._host, self._port)
 
     async def close(self) -> None:
-        """Close the Modbus connection."""
+        """Close the Modbus connection (pymodbus 3.x close() is synchronous)."""
         if self._client:
-            await self._client.close()
+            try:
+                self._client.close()
+            except Exception as err:
+                LOGGER.debug("Error closing Modbus connection: %s", err)
             LOGGER.debug("Closed Modbus connection")
         self._client = None
 

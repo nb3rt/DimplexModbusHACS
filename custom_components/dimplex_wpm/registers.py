@@ -128,7 +128,7 @@ REGISTERS: tuple[RegisterSpec, ...] = (
     # ===== Controller: ambient, mode, diagnostics =====
     _temp("outdoor_temperature", 1, M_CONTROLLER, "Outdoor temperature"),
     RegisterSpec(
-        "inverter_frequency", 114, scale=0.1, unit="Hz",
+        "inverter_frequency", 114, scale=0.1, unit="Hz", device_class="frequency",
         state_class="measurement", entity_category="diagnostic",
         module=M_CONTROLLER, name="Inverter frequency", re_only=True,
         capability=CAP_INVERTER_FREQ, icon="mdi:sine-wave",
@@ -261,7 +261,8 @@ REGISTERS: tuple[RegisterSpec, ...] = (
                  capability=CAP_ELECTRIC_METER, name="Electrical power"),
     RegisterSpec("pv_surplus", 5182, signed=True, scale=0.01, unit="kW",
                  device_class="power", state_class="measurement", module=M_ENERGY,
-                 entity_category="diagnostic", name="PV surplus", icon="mdi:solar-power-variant"),
+                 entity_category="diagnostic", capability=CAP_ELECTRIC_METER,
+                 name="PV surplus", icon="mdi:solar-power-variant"),
 
     # ===== Coils — digital inputs (diagnostic) =====
     RegisterSpec("smartgrid_input_1", 3, obj=COIL, entity_category="diagnostic",
@@ -320,10 +321,10 @@ REGISTERS: tuple[RegisterSpec, ...] = (
 
 
 ENERGY_GROUPS: tuple[EnergyGroup, ...] = (
-    EnergyGroup("energy_heating", 5096, 5097, 5098, "Heating energy"),
-    EnergyGroup("energy_dhw", 5099, 5100, 5101, "DHW energy"),
-    EnergyGroup("energy_pool", 5102, 5103, 5104, "Pool energy", module=M_POOL),
-    EnergyGroup("energy_environment", 5127, 5128, 5129, "Environmental energy"),
+    EnergyGroup("energy_heating", 5096, 5097, 5098, "Heating energy (meter)"),
+    EnergyGroup("energy_dhw", 5099, 5100, 5101, "DHW energy (meter)"),
+    EnergyGroup("energy_pool", 5102, 5103, 5104, "Pool energy (meter)", module=M_POOL),
+    EnergyGroup("energy_environment", 5127, 5128, 5129, "Environmental energy (meter)"),
 )
 
 
@@ -507,8 +508,10 @@ WRITE_REGISTERS: tuple[WriteSpec, ...] = (
     WriteSpec("set_dhw_setpoint_max", 5048, "DHW setpoint maximum", M_DHW, min_value=10, max_value=85,
               unit="°C", device_class="temperature"),
     # HC1
+    # NOTE: setpoint scaling assumed whole-°C (matches the working YAML which read
+    # these as plain uint16 °C). Verify on device before trusting writes.
     WriteSpec("set_hc1_room_setpoint", 46, "HC1 room setpoint", M_HC1, min_value=15, max_value=30,
-              step=0.5, unit="°C", device_class="temperature", icon="mdi:home-thermometer"),
+              step=1, unit="°C", device_class="temperature", icon="mdi:home-thermometer"),
     WriteSpec("set_hc1_fixed_flow", 5037, "HC1 fixed flow setpoint", M_HC1, min_value=18, max_value=60,
               unit="°C", device_class="temperature"),
     WriteSpec("set_hc1_curve_end", 5038, "HC1 heating curve end", M_HC1, min_value=20, max_value=70,
@@ -518,6 +521,10 @@ WRITE_REGISTERS: tuple[WriteSpec, ...] = (
     # Pool (optional)
     WriteSpec("set_pool_setpoint", 5051, "Pool setpoint", M_POOL, min_value=5, max_value=60,
               unit="°C", device_class="temperature", module_flag=M_POOL, icon="mdi:pool-thermometer"),
+    # HC2/3 cooling room setpoint (enum-coded; uses the cool_setpoint encoder)
+    WriteSpec("set_hc23_cooling_setpoint", 5089, "HC2/3 cooling room setpoint", M_HC2_3,
+              min_value=15, max_value=30, step=0.5, unit="°C", encode="cool_setpoint",
+              device_class="temperature", module_flag=M_HC2_3, icon="mdi:snowflake-thermometer"),
     # Operating mode (select)
     WriteSpec("set_operating_mode", 5015, "Operating mode", M_CONTROLLER, kind=KIND_SELECT,
               options_map={0: "Summer", 1: "Winter", 2: "Holiday", 3: "Party",

@@ -152,6 +152,11 @@ class DimplexWritableNumber(DimplexEntityMixin, CoordinatorEntity, NumberEntity)
             self._attr_icon = ws.icon
 
     @property
+    def available(self) -> bool:
+        # Writable: keep operable even if the read-back register is missing.
+        return self.coordinator.last_update_success
+
+    @property
     def native_value(self) -> Any:
         return (self.coordinator.data or {}).get("values", {}).get(self._ws.key)
 

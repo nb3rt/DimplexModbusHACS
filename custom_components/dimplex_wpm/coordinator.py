@@ -85,6 +85,7 @@ class DimplexDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         }
         self._prev_delta_t: float | None = None
         self._prev_delta_t_ts = None
+        self._flow_ema: float | None = None
 
         self.specs = active_registers(
             version=software_version,
@@ -226,6 +227,14 @@ class DimplexDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             if flow_rate is None:
                 flow_rate = est.estimated_flow_m3h(tc_w, values.get("delta_t", 0.0), status)
             values["flow_rate"] = flow_rate
+            # EMA-smoothed flow for stabler charts (and stabler downstream use).
+            ema_alpha = 0.3
+            self._flow_ema = (
+                flow_rate
+                if self._flow_ema is None
+                else round(ema_alpha * flow_rate + (1 - ema_alpha) * self._flow_ema, 2)
+            )
+            values["flow_rate_smoothed"] = self._flow_ema
 
         # Preferred (best) power sources + measured COP.
         if CAP_ELECTRIC_METER in self.capabilities and values.get("electrical_power") is not None:

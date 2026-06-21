@@ -115,6 +115,7 @@ async def async_setup_entry(
             computed(cs.key, cs.name, cs.unit, cs.device_class, cs.icon, "estimated")
         flow_src = "measured" if CAP_FLOW_SENSOR in caps else "estimated"
         computed("flow_rate", "Flow rate", "m³/h", None, "mdi:water-pump", flow_src)
+        computed("flow_rate_smoothed", "Flow rate (smoothed)", "m³/h", None, "mdi:water", flow_src)
     if coordinator.profile.cop_table:
         computed("cop_estimated", "COP (est.)", None, None, "mdi:chart-bell-curve", "estimated")
     if CAP_HEAT_METER in caps and CAP_ELECTRIC_METER in caps:
@@ -140,20 +141,21 @@ async def async_setup_entry(
         )
 
     if CAP_ELECTRIC_METER in caps or coordinator.estimation_possible:
+        elec_measured = CAP_ELECTRIC_METER in caps
         energy(
-            "electrical_energy_kwh", "electrical_power_best", "Electrical energy",
-            "measured" if CAP_ELECTRIC_METER in caps else "estimated",
+            "electrical_energy_kwh", "electrical_power_best",
+            f"Electrical energy ({'meter' if elec_measured else 'est.'})",
+            "measured" if elec_measured else "estimated",
         )
-    if CAP_HEAT_METER in caps or coordinator.estimation_possible:
-        energy(
-            "heat_energy_kwh", "heat_output_best", "Heat energy",
-            "measured" if CAP_HEAT_METER in caps else "estimated",
-        )
+    # Estimated heat energy only when there is NO heat meter (the measured
+    # digit-group energy_* sensors already cover that case → avoid double counting).
+    if coordinator.estimation_possible and CAP_HEAT_METER not in caps:
+        energy("heat_energy_kwh", "heat_output_best", "Heat energy (est.)", "estimated")
     if coordinator.estimation_possible:
-        energy("heat_energy_to_house_kwh", "thermal_power_to_house", "Heat energy to house", "estimated")
+        energy("heat_energy_to_house_kwh", "thermal_power_to_house", "Heat energy to house (est.)", "estimated")
         energy(
             "heat_energy_to_installation_kwh", "thermal_power_to_installation",
-            "Heat energy to installation", "estimated",
+            "Heat energy to installation (est.)", "estimated",
         )
 
     async_add_entities(entities)
@@ -191,6 +193,7 @@ class DimplexEnergySensor(DimplexEntityMixin, CoordinatorEntity, SensorEntity):
     _attr_device_class = SensorDeviceClass.ENERGY
     _attr_state_class = SensorStateClass.TOTAL_INCREASING
     _attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
+    _attr_suggested_display_precision = 3
 
     def __init__(self, coordinator, entry, group: EnergyGroup, *, host, version, model) -> None:
         CoordinatorEntity.__init__(self, coordinator)

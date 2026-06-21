@@ -152,14 +152,15 @@ class DimplexConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
-        return DimplexOptionsFlow(config_entry)
+        return DimplexOptionsFlow()
 
 
 class DimplexOptionsFlow(config_entries.OptionsFlow):
-    """Options: tuning, modules, capabilities, and the M2 write gate."""
+    """Options: tuning, modules, capabilities, and the control gate.
 
-    def __init__(self, config_entry) -> None:
-        self.config_entry = config_entry
+    ``self.config_entry`` is provided by the base class (HA 2024.11+); do not
+    assign it manually.
+    """
 
     def _current(self, key, default):
         return self.config_entry.options.get(

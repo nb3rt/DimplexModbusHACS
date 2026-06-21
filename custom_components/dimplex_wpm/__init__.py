@@ -20,6 +20,7 @@ from .const import (
     CONF_TIMEOUT,
     CONF_UNIT_ID,
     DEFAULT_ENABLE_WRITE,
+    DEFAULT_PROFILE,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_SOFTWARE_VERSION,
     DEFAULT_TIMEOUT,
@@ -55,7 +56,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     scan_interval = source.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
     software_version = source.get(CONF_SOFTWARE_VERSION, DEFAULT_SOFTWARE_VERSION)
 
-    profile = get_profile(source.get(CONF_PROFILE))
+    profile = get_profile(source.get(CONF_PROFILE, DEFAULT_PROFILE))
 
     if CONF_ENABLED_MODULES in source:
         enabled_modules = resolve_enabled_modules(source)

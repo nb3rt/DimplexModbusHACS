@@ -31,8 +31,10 @@ def build_device_info(
     else:
         identifiers = {(DOMAIN, f"{entry.entry_id}_{module}")}
 
+    # Keep the host OUT of the device name: the name seeds entity_ids, so an IP
+    # in the name would bake the host into every entity_id (non-portable).
     if module == MODULE_ROOT:
-        name = f"{DEVICE_NAME} ({host})" if host else DEVICE_NAME
+        name = DEVICE_NAME
     else:
         name = MODULE_NAME_MAP.get(module, module)
 

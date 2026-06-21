@@ -57,7 +57,7 @@ class DimplexSGReadySelect(CoordinatorEntity, SelectEntity):
     """Representation of the SG Ready mode select."""
 
     _attr_has_entity_name = True
-    _attr_translation_key = "sg_ready_mode"
+    _attr_name = "SG Ready mode"
 
     def __init__(
         self,
@@ -87,7 +87,9 @@ class DimplexSGReadySelect(CoordinatorEntity, SelectEntity):
     def current_option(self) -> str | None:
         if not self.coordinator.data:
             return None
-        return self.coordinator.data.get("values", {}).get("sg_ready_text")
+        value = self.coordinator.data.get("values", {}).get("sg_ready_text")
+        # Guard against unmapped device codes ("Unknown (x)") not in options.
+        return value if value in SG_READY_REVERSE else None
 
     @property
     def options(self) -> list[str]:
@@ -125,6 +127,11 @@ class DimplexWriteSelect(DimplexEntityMixin, CoordinatorEntity, SelectEntity):
         self._attr_options = list((ws.options_map or {}).values())
         if ws.icon:
             self._attr_icon = ws.icon
+
+    @property
+    def available(self) -> bool:
+        # Writable: keep operable even if the read-back register is missing.
+        return self.coordinator.last_update_success
 
     @property
     def current_option(self) -> str | None:
