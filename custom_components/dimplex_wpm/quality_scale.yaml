@@ -1,0 +1,99 @@
+# Integration Quality Scale tracking for dimplex_wpm.
+# Honest self-assessment of the redesign. Bronze is largely met; the remaining
+# Bronze/Silver gaps are HA-runtime test coverage and entry.runtime_data.
+rules:
+  # ---------------- Bronze ----------------
+  action-setup:
+    status: exempt
+    comment: Integration provides no service actions.
+  appropriate-polling: done
+  brands: done  # custom_components/dimplex_wpm/brand/{icon,logo}{,@2x}.png
+  common-modules: done  # coordinator.py, entity.py
+  config-flow: done
+  config-flow-test-coverage:
+    status: todo
+    comment: Pure-logic tests exist; HA-based config-flow tests pending.
+  dependency-transparency: done  # pymodbus, pinned, OSS
+  docs-actions:
+    status: exempt
+    comment: No service actions.
+  docs-high-level-description: done
+  docs-installation-instructions: done
+  docs-removal-instructions: done
+  entity-event-setup: done  # CoordinatorEntity
+  entity-unique-id: done
+  has-entity-name: done
+  runtime-data:
+    status: todo
+    comment: Uses hass.data[DOMAIN][entry_id]; migrate to entry.runtime_data.
+  test-before-configure: done  # config flow reads a holding register
+  test-before-setup: done  # async_config_entry_first_refresh
+  unique-config-entry: done  # unique_id host:port_unit
+
+  # ---------------- Silver ----------------
+  action-exceptions: done  # writes raise HomeAssistantError
+  config-entry-unloading: done
+  docs-configuration-parameters: done
+  docs-installation-parameters: done
+  entity-unavailable: done  # UpdateFailed → unavailable; availability checks
+  integration-owner: done  # codeowners @nb3rt
+  log-when-unavailable: done  # coordinator logs on UpdateFailed
+  parallel-updates: done  # PARALLEL_UPDATES set on every platform
+  reauthentication-flow:
+    status: exempt
+    comment: Modbus TCP has no authentication.
+  test-coverage:
+    status: todo
+    comment: Pure estimation/register tests done; HA entity/coordinator tests pending.
+
+  # ---------------- Gold ----------------
+  devices: done  # medium device tree
+  diagnostics: done  # diagnostics.py (host redacted)
+  discovery:
+    status: exempt
+    comment: Modbus TCP devices have no standard discovery; host entered manually.
+  discovery-update-info:
+    status: exempt
+    comment: No discovery.
+  docs-data-update: done
+  docs-examples: done  # dashboards/
+  docs-known-limitations: done
+  docs-supported-devices: done  # profiles + README
+  docs-supported-functions: done
+  docs-troubleshooting:
+    status: todo
+    comment: Add a troubleshooting section.
+  docs-use-cases: done
+  dynamic-devices:
+    status: exempt
+    comment: Device set is fixed per config (modules/capabilities).
+  entity-category: done
+  entity-device-class: done
+  entity-disabled-by-default:
+    status: todo
+    comment: Consider disabling noisy diagnostic coils by default.
+  entity-translations: done  # en/pl/de entity names
+  exception-translations:
+    status: todo
+    comment: HomeAssistantError messages are not yet translated.
+  icon-translations:
+    status: todo
+    comment: Uses _attr_icon; migrate to icons.json.
+  reconfiguration-flow:
+    status: todo
+    comment: Options flow exists; add a full reconfigure (host/port) flow.
+  repair-issues:
+    status: exempt
+    comment: No repairable issues are raised yet.
+  stale-devices:
+    status: exempt
+    comment: No dynamic device removal.
+
+  # ---------------- Platinum ----------------
+  async-dependency: done  # AsyncModbusTcpClient
+  inject-websession:
+    status: exempt
+    comment: Modbus, not HTTP.
+  strict-typing:
+    status: todo
+    comment: Partial type hints; full strict typing + py.typed pending.

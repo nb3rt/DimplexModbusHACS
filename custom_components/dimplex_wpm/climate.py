@@ -28,6 +28,8 @@ from .const import CONF_ENABLE_WRITE_ENTITIES, DEFAULT_ENABLE_WRITE, DOMAIN
 from .entity import DimplexEntityMixin
 from .registers import M_DHW, M_HC1
 
+PARALLEL_UPDATES = 1  # serialize writes to the controller
+
 
 @dataclass(frozen=True)
 class ClimateDef:

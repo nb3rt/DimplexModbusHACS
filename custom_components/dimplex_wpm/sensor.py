@@ -30,6 +30,8 @@ from .registers import (
     RegisterSpec,
 )
 
+PARALLEL_UPDATES = 0  # read-only, coordinator-driven
+
 DEVICE_CLASS_MAP = {
     "temperature": SensorDeviceClass.TEMPERATURE,
     "power": SensorDeviceClass.POWER,

@@ -22,6 +22,8 @@ from .device import build_device_info
 from .entity import DimplexEntityMixin
 from .registers import KIND_SELECT, WriteSpec
 
+PARALLEL_UPDATES = 1  # serialize writes to the controller
+
 
 async def async_setup_entry(
     hass: HomeAssistant,

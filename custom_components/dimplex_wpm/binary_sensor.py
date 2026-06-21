@@ -16,6 +16,8 @@ from .const import DOMAIN, MODULE_ROOT
 from .entity import DimplexEntityMixin
 from .registers import COIL, RegisterSpec
 
+PARALLEL_UPDATES = 0  # read-only, coordinator-driven
+
 DEVICE_CLASS_MAP = {
     "running": BinarySensorDeviceClass.RUNNING,
     "problem": BinarySensorDeviceClass.PROBLEM,

@@ -28,6 +28,8 @@ from .const import CONF_ENABLE_WRITE_ENTITIES, DEFAULT_ENABLE_WRITE, DOMAIN
 from .entity import DimplexEntityMixin
 from .registers import KIND_NUMBER, M_ENERGY, WriteSpec
 
+PARALLEL_UPDATES = 1  # serialize writes to the controller
+
 NUMBER_DEVICE_CLASS_MAP = {"temperature": NumberDeviceClass.TEMPERATURE}
 
 

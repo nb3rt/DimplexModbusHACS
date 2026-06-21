@@ -60,6 +60,12 @@ device probe; without a meter the value is estimated.
 entity, include reverse-engineered registers, and **Enable control / write
 entities** (the write gate).
 
+## Removal
+
+Settings → Devices & Services → Dimplex WPM → ⋮ → **Delete**. All entities and
+devices are removed with the config entry. To uninstall the code, remove the
+integration from HACS (or delete `custom_components/dimplex_wpm/`) and restart.
+
 ## Dashboards
 
 Import `dashboards/dimplex_wpm.yaml` (Settings → Dashboards → New dashboard →
@@ -92,3 +98,11 @@ This is the redesign branch. Architecture and rationale live in
 [`DESIGN.md`](DESIGN.md); the verified register map in
 [`spec/REGISTERS.md`](spec/REGISTERS.md). CI runs hassfest, HACS validation,
 ruff and pytest.
+
+**Quality scale** (self-assessment in
+[`custom_components/dimplex_wpm/quality_scale.yaml`](custom_components/dimplex_wpm/quality_scale.yaml)):
+most of Bronze and Silver is met (config flow, unload, error handling,
+parallel-updates, diagnostics, entity translations, async client). Open items
+before formally claiming a tier: HA-runtime test coverage (config flow +
+coordinator), `entry.runtime_data` migration, and Gold polish (icon
+translations, reconfigure flow, exception translations).
