@@ -1,0 +1,342 @@
+# Dimplex WPM — combined dashboard (M3 v1)
+#
+# Built-in cards only (no HACS frontend dependency). Entity ids follow the
+# derived default-naming scheme in spec/ENTITY_IDS.md — if you renamed entities,
+# adjust the ids. Import via Settings → Dashboards → New → Edit (raw YAML) and
+# paste, or include as a YAML-mode dashboard. Module/meter-specific cards hide
+# themselves when their entity is unavailable.
+#
+# Optional polish (not required): install apexcharts-card for dual-axis power/COP
+# plots — see spec/DASHBOARD_DESIGN.md. The History view below uses built-in
+# history-graph / statistics-graph instead.
+title: Dimplex WPM
+views:
+  # ============================ Overview ============================
+  - title: Overview
+    path: overview
+    type: sections
+    max_columns: 3
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Dimplex WPM
+            icon: mdi:heat-pump
+          - type: glance
+            show_state: true
+            entities:
+              - entity: sensor.dimplex_wpm_status
+                name: Status
+              - entity: sensor.dimplex_wpm_outdoor_temperature
+                name: Outdoor
+              - entity: sensor.analytics_cop_est
+                name: COP
+              - entity: sensor.analytics_electrical_power
+                name: Power
+              - entity: sensor.dimplex_wpm_sg_ready_state
+                name: SG Ready
+      - type: grid
+        cards:
+          - type: heading
+            heading: Heat pump now
+          - type: tile
+            entity: sensor.dimplex_wpm_outdoor_temperature
+            name: Outdoor
+          - type: tile
+            entity: sensor.heating_circuit_1_flow_temperature
+            name: Flow
+          - type: tile
+            entity: sensor.heating_circuit_1_return_temperature
+            name: Return
+          - type: tile
+            entity: sensor.domestic_hot_water_dhw_temperature
+            name: DHW
+          - type: tile
+            entity: sensor.analytics_electrical_power
+            name: Electrical power
+          - type: gauge
+            entity: sensor.analytics_cop_est
+            name: COP (est.)
+            min: 0
+            max: 6
+            needle: true
+            severity:
+              green: 3.5
+              yellow: 2
+              red: 0
+      - type: grid
+        cards:
+          - type: heading
+            heading: Operating state
+          - type: entities
+            show_header_toggle: false
+            entities:
+              - entity: sensor.dimplex_wpm_status
+                name: Operating status
+                secondary_info: last-changed
+              - entity: sensor.dimplex_wpm_lock
+                name: Lock
+              - entity: sensor.dimplex_wpm_fault
+                name: Fault
+              - entity: sensor.dimplex_wpm_sensor_error
+                name: Sensor error
+              - entity: binary_sensor.dimplex_wpm_lock_active
+                name: Any lock active
+              - entity: binary_sensor.dimplex_wpm_fault_active
+                name: Any fault active
+              - entity: binary_sensor.dimplex_wpm_2nd_heat_generator
+                name: 2nd heat generator running
+              - entity: sensor.dimplex_wpm_2nd_heat_generator_runtime
+                name: 2nd heat generator runtime
+          - type: entities
+            title: Smart Grid
+            entities:
+              - entity: sensor.dimplex_wpm_sg_ready_state
+                name: SG Ready state
+              - entity: binary_sensor.dimplex_wpm_smartgrid_input_1
+                name: SG input 1
+              - entity: binary_sensor.dimplex_wpm_smartgrid_input_2
+                name: SG input 2
+              - entity: binary_sensor.dimplex_wpm_utility_evu_lockout
+                name: Utility (EVU) lockout
+
+  # ========================= Heat & Energy =========================
+  - title: Heat & Energy
+    path: energy
+    type: sections
+    max_columns: 2
+    sections:
+      - type: grid
+        cards:
+          - type: markdown
+            content: >
+              **Source legend** — values from the analytics engine are marked
+              **(est.)**. With a real meter installed, the corresponding entity
+              reports measured values (see the `source` attribute).
+      - type: grid
+        cards:
+          - type: heading
+            heading: Power & heat (6 h)
+          - type: history-graph
+            hours_to_show: 6
+            entities:
+              - entity: sensor.analytics_electrical_power
+              - entity: sensor.analytics_heat_output
+              - entity: sensor.analytics_compressor_heat_output_est
+              - entity: sensor.analytics_heater_heat_output_est
+              - entity: sensor.analytics_defrost_heat_loss_est
+              - entity: sensor.analytics_loop_heat_output_est
+          - type: history-graph
+            hours_to_show: 6
+            entities:
+              - entity: sensor.analytics_cop_est
+              - entity: sensor.analytics_cop_measured
+      - type: grid
+        cards:
+          - type: heading
+            heading: House / installation split
+          - type: history-graph
+            hours_to_show: 6
+            entities:
+              - entity: sensor.analytics_heat_to_house_est
+              - entity: sensor.analytics_heat_to_installation_est
+              - entity: sensor.analytics_house_heat_fraction
+          - type: heading
+            heading: Flow & ΔT
+          - type: history-graph
+            hours_to_show: 6
+            entities:
+              - entity: sensor.analytics_flow_rate
+              - entity: sensor.analytics_flow_rate_smoothed
+              - entity: sensor.analytics_temperature_difference
+      - type: grid
+        cards:
+          - type: heading
+            heading: Energy
+          - type: statistics-graph
+            period: day
+            days_to_show: 30
+            stat_types:
+              - change
+            chart_type: bar
+            entities:
+              - entity: sensor.analytics_electrical_energy_est
+              - entity: sensor.analytics_heat_energy_to_house_est
+          - type: entities
+            title: Energy totals
+            entities:
+              - entity: sensor.analytics_electrical_energy_est
+              - entity: sensor.analytics_heat_energy_est
+              - entity: sensor.analytics_heat_energy_to_house_est
+              - entity: sensor.analytics_heat_energy_to_installation_est
+              - entity: sensor.analytics_heating_energy_meter
+                visibility:
+                  - condition: state
+                    entity: sensor.analytics_heating_energy_meter
+                    state_not: unavailable
+          - type: markdown
+            content: >
+              Add **one** electrical-energy entity to the Energy Dashboard
+              (Settings → Dashboards → Energy) — the total is the safe default.
+              The heat-delivered (thermal) sensors are **not** electricity; do
+              not add them as grid consumption.
+
+  # =========================== History =============================
+  - title: History
+    path: history
+    type: sections
+    max_columns: 2
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Temperatures (24 h)
+          - type: history-graph
+            hours_to_show: 24
+            entities:
+              - entity: sensor.dimplex_wpm_outdoor_temperature
+              - entity: sensor.heating_circuit_1_flow_temperature
+              - entity: sensor.heating_circuit_1_return_temperature
+              - entity: sensor.heating_circuit_1_return_setpoint_temperature
+              - entity: sensor.domestic_hot_water_dhw_temperature
+              - entity: sensor.heat_source_source_inlet_temperature
+              - entity: sensor.heat_source_source_outlet_temperature
+      - type: grid
+        cards:
+          - type: heading
+            heading: Activity (24 h)
+          - type: history-graph
+            hours_to_show: 24
+            entities:
+              - entity: sensor.dimplex_wpm_status
+              - entity: sensor.dimplex_wpm_inverter_frequency
+              - entity: binary_sensor.dimplex_wpm_compressor_1
+              - entity: binary_sensor.heating_circuit_1_heating_pump_m13
+              - entity: binary_sensor.domestic_hot_water_dhw_pump
+              - entity: binary_sensor.dimplex_wpm_2nd_heat_generator
+      - type: grid
+        cards:
+          - type: heading
+            heading: Long-term trends (30 d)
+          - type: statistics-graph
+            period: day
+            days_to_show: 30
+            stat_types:
+              - mean
+            entities:
+              - entity: sensor.analytics_cop_est
+              - entity: sensor.dimplex_wpm_outdoor_temperature
+
+  # ===================== Control (gated) ===========================
+  - title: Control
+    path: control
+    type: sections
+    max_columns: 2
+    sections:
+      - type: grid
+        cards:
+          - type: markdown
+            content: >
+              ⚠️ **These controls write to the heat-pump controller.** Values are
+              range-validated, but changes affect a live system. Setpoint
+              register scaling is assumed whole-°C and should be verified on your
+              device. Controls appear only when **Enable control / write
+              entities** is on in the integration options.
+      - type: grid
+        cards:
+          - type: heading
+            heading: Domestic hot water
+          - type: tile
+            entity: number.domestic_hot_water_dhw_setpoint
+            name: DHW setpoint
+            features:
+              - type: numeric-input
+                style: slider
+            visibility:
+              - condition: state
+                entity: number.domestic_hot_water_dhw_setpoint
+                state_not: unavailable
+          - type: heading
+            heading: Heating circuit 1
+          - type: entities
+            entities:
+              - entity: number.heating_circuit_1_hc1_room_setpoint
+              - entity: number.heating_circuit_1_hc1_fixed_flow_setpoint
+              - entity: number.heating_circuit_1_hc1_heating_curve_end
+              - entity: number.heating_circuit_1_hc1_curve_offset
+            visibility:
+              - condition: state
+                entity: number.heating_circuit_1_hc1_room_setpoint
+                state_not: unavailable
+      - type: grid
+        cards:
+          - type: heading
+            heading: Modes
+          - type: entities
+            entities:
+              - entity: select.dimplex_wpm_sg_ready_mode
+              - entity: select.dimplex_wpm_operating_mode
+            visibility:
+              - condition: state
+                entity: select.dimplex_wpm_sg_ready_mode
+                state_not: unavailable
+
+  # ================ Diagnostics & Calibration ======================
+  - title: Diagnostics
+    path: diagnostics
+    type: sections
+    max_columns: 2
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Estimation calibration
+          - type: entities
+            entities:
+              - entity: number.analytics_calibration_dhw_power_factor
+              - entity: number.analytics_calibration_defrost_power_factor
+              - entity: number.analytics_calibration_defrost_heat_loss_factor
+              - entity: number.analytics_calibration_2nd_source_heater_power
+              - entity: number.analytics_calibration_main_pump_power
+              - entity: number.analytics_calibration_floor_pump_power
+              - entity: number.analytics_calibration_alpha_base
+              - entity: number.analytics_calibration_alpha_sensitivity
+              - entity: number.analytics_calibration_alpha_deadband
+      - type: grid
+        cards:
+          - type: heading
+            heading: Estimation cross-check
+          - type: entities
+            entities:
+              - entity: sensor.dimplex_wpm_inverter_frequency
+              - entity: sensor.analytics_compressor_power_est
+              - entity: sensor.analytics_cop_est
+              - entity: sensor.analytics_temperature_difference
+              - entity: sensor.analytics_flow_rate
+      - type: grid
+        cards:
+          - type: heading
+            heading: Controller diagnostics
+          - type: entities
+            entities:
+              - entity: sensor.dimplex_wpm_controller_info
+              - entity: sensor.dimplex_wpm_status_code
+              - entity: sensor.dimplex_wpm_lock_code
+              - entity: sensor.dimplex_wpm_fault_code
+              - entity: sensor.dimplex_wpm_sensor_error_code
+              - entity: sensor.dimplex_wpm_compressor_1_runtime
+              - entity: sensor.dimplex_wpm_compressor_2_runtime
+              - entity: sensor.dimplex_wpm_primary_pump_fan_runtime
+      - type: grid
+        cards:
+          - type: heading
+            heading: Outputs
+          - type: entities
+            entities:
+              - entity: binary_sensor.dimplex_wpm_compressor_1
+              - entity: binary_sensor.dimplex_wpm_compressor_2
+              - entity: binary_sensor.dimplex_wpm_primary_pump_fan
+              - entity: binary_sensor.dimplex_wpm_2nd_heat_generator
+              - entity: binary_sensor.heating_circuit_1_heating_pump_m13
+              - entity: binary_sensor.domestic_hot_water_dhw_pump
+              - entity: binary_sensor.dimplex_wpm_immersion_heater

@@ -68,7 +68,7 @@ ESTIMATED_COMPUTED: tuple[ComputedSpec, ...] = (
     ComputedSpec("thermal_power_loop", "Loop heat output (est.)", "kW", "power", "mdi:fire"),
     ComputedSpec("thermal_power_to_house", "Heat to house (est.)", "kW", "power", "mdi:home-thermometer"),
     ComputedSpec("thermal_power_to_installation", "Heat to installation (est.)", "kW", "power", "mdi:pipe-valve"),
-    ComputedSpec("alpha_house", "House heat fraction (α)", None, None, "mdi:home-percent"),
+    ComputedSpec("alpha_house", "House heat fraction", None, None, "mdi:home-percent"),
 )
 
 
@@ -108,9 +108,9 @@ async def async_setup_entry(
             )
         )
 
-    computed("delta_t", "ΔT (flow − return)", "K", None, "mdi:delta", "measured")
+    computed("delta_t", "Temperature difference", "K", None, "mdi:delta", "measured")
     if coordinator.estimation_possible:
-        computed("ddelta_t_dt", "ΔT rate", "K/min", None, "mdi:delta", "estimated")
+        computed("ddelta_t_dt", "Temperature difference rate", "K/min", None, "mdi:delta", "estimated")
         for cs in ESTIMATED_COMPUTED:
             computed(cs.key, cs.name, cs.unit, cs.device_class, cs.icon, "estimated")
         flow_src = "measured" if CAP_FLOW_SENSOR in caps else "estimated"

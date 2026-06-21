@@ -439,7 +439,7 @@ MODULE_NAME_MAP: Final = {
     M_SOLAR: "Solar",
     M_SOURCE: "Heat source",
     M_COOLING: "Passive cooling",
-    M_ENERGY: "Energy & analytics",
+    M_ENERGY: "Analytics",
 }
 
 # ----- profile / modules / capabilities (config entry) --------------------

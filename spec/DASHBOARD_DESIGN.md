@@ -1,5 +1,14 @@
 # Dimplex WPM — Dashboard Design
 
+> **Status: M3 v1 AUTHORED.** The built-in-card dashboard is shipped at
+> `dashboards/dimplex_wpm.yaml`, using the REAL entity ids documented in
+> `spec/ENTITY_IDS.md` (the placeholder slugs in the sketches below — `analytics_*`
+> / `sg_*` / `cop_en14511` — were reconciled: module is `energy`→device "Analytics",
+> SG lives on the controller, COP is `cop_estimated`/`cop_measured`, energy uses
+> single source-attributed entities, flow adds an EMA `flow_rate_smoothed`).
+> Climate cards are omitted (platform deferred). apexcharts remains an optional
+> v2 upgrade. The sections below are retained as design rationale.
+
 > **Status: DESIGN.** Companion to `DESIGN.md` (architecture, device tree §5/§5.0,
 > source matrix §6, capabilities §4.1) and `spec/REGISTERS.md` (canonical
 > registers/entities). This document specifies the Home Assistant front-end:
