@@ -113,6 +113,51 @@ views:
               **Source legend** — values from the analytics engine are marked
               **(est.)**. With a real meter installed, the corresponding entity
               reports measured values (see the `source` attribute).
+      # --- Optional: apexcharts-card (install from HACS) for dual-axis / stacked
+      #     plots. If you don't install it, delete this section and keep the
+      #     built-in history-graph section below.
+      - type: grid
+        cards:
+          - type: custom:apexcharts-card
+            header:
+              title: Power & efficiency (6 h)
+              show: true
+            graph_span: 6h
+            yaxis:
+              - id: kw
+                decimals: 2
+              - id: cop
+                opposite: true
+                min: 0
+                max: 6
+            series:
+              - entity: sensor.analytics_electrical_power
+                name: Electrical power
+                yaxis_id: kw
+              - entity: sensor.analytics_loop_heat_output_est
+                name: Heat output (est.)
+                yaxis_id: kw
+              - entity: sensor.analytics_cop_est
+                name: COP (est.)
+                yaxis_id: cop
+                stroke_width: 1
+          - type: custom:apexcharts-card
+            stacked: true
+            header:
+              title: Thermal balance (6 h)
+              show: true
+            graph_span: 6h
+            series:
+              - entity: sensor.analytics_compressor_heat_output_est
+                name: Compressor
+                type: area
+              - entity: sensor.analytics_heater_heat_output_est
+                name: Heater
+                type: area
+              - entity: sensor.analytics_defrost_heat_loss_est
+                name: Defrost loss
+                type: area
+      # --- Built-in fallback (no HACS frontend dependency) ---
       - type: grid
         cards:
           - type: heading
@@ -242,6 +287,22 @@ views:
               register scaling is assumed whole-°C and should be verified on your
               device. Controls appear only when **Enable control / write
               entities** is on in the integration options.
+      - type: grid
+        cards:
+          - type: heading
+            heading: Thermostats
+          - type: thermostat
+            entity: climate.heating_circuit_1_thermostat
+            visibility:
+              - condition: state
+                entity: climate.heating_circuit_1_thermostat
+                state_not: unavailable
+          - type: thermostat
+            entity: climate.domestic_hot_water_thermostat
+            visibility:
+              - condition: state
+                entity: climate.domestic_hot_water_thermostat
+                state_not: unavailable
       - type: grid
         cards:
           - type: heading

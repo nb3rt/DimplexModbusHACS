@@ -81,8 +81,8 @@ not add them as grid consumption.
 - **Setpoint scaling** for some writable registers is assumed whole-°C (matches
   the working YAML) and should be **verified on a real device** before relying
   on writes. The control gate is off by default and writes are range-validated.
-- **Climate** (thermostat) entities for HC1/DHW are planned but not yet shipped;
-  setpoint control is via `number` entities for now.
+- **Climate** thermostats for HC1 and DHW are available behind the control gate
+  (current temperature from a read sensor, target = the writable setpoint).
 - Estimation requires the LAK9 profile (calibration) + the inverter-frequency
   register; the generic profile yields read-only entities.
 

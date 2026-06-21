@@ -61,6 +61,8 @@ is standard Home Assistant behaviour with `has_entity_name`.
   `number.heating_circuit_1_hc1_fixed_flow_setpoint`,
   `number.heating_circuit_1_hc1_heating_curve_end`,
   `number.heating_circuit_1_hc1_curve_offset`
+- control: `climate.heating_circuit_1_thermostat` (current = room temp/return,
+  target = room setpoint)
 
 ## Domestic hot water (`dhw`)
 - `sensor.domestic_hot_water_dhw_temperature` · `..._dhw_setpoint_temperature`
@@ -68,6 +70,8 @@ is standard Home Assistant behaviour with `has_entity_name`.
   `binary_sensor.domestic_hot_water_dhw_pump` [diag]
 - control: `number.domestic_hot_water_dhw_setpoint`, `..._dhw_setpoint_minimum`,
   `..._dhw_setpoint_maximum`
+- control: `climate.domestic_hot_water_thermostat` (current = DHW temp,
+  target = DHW setpoint)
 
 ## Heat source (`source`)
 - `sensor.heat_source_source_inlet_temperature` · `..._source_outlet_temperature`

@@ -41,6 +41,7 @@ PLATFORMS = [
     Platform.BINARY_SENSOR,
     Platform.NUMBER,
     Platform.SELECT,
+    Platform.CLIMATE,
 ]
 
 
