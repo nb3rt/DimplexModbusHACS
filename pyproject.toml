@@ -1,0 +1,16 @@
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = ["spec", "existing integration"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+force-sort-within-sections = true
+known-first-party = ["custom_components"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

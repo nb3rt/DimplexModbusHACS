@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-from pymodbus.exceptions import ModbusException
-
 from homeassistant.components.select import SelectEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from pymodbus.exceptions import ModbusException
 
 from .const import (
     CONF_ENABLE_WRITE_ENTITIES,

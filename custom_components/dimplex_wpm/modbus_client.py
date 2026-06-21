@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable, Iterable
 import inspect
 import logging
-from typing import Any, Callable, Iterable, Optional
+from typing import Any
 
 from pymodbus.client import AsyncModbusTcpClient
 from pymodbus.exceptions import ModbusException
@@ -29,7 +30,7 @@ class DimplexModbusClient:
         self._port = port
         self._unit_id = unit_id
         self._timeout = timeout
-        self._client: Optional[AsyncModbusTcpClient] = None
+        self._client: AsyncModbusTcpClient | None = None
         self._lock = asyncio.Lock()
 
     async def connect(self) -> None:
